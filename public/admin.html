@@ -1767,17 +1767,24 @@
         // 手動投稿のドラッグ＆ドロップ
         document.addEventListener('DOMContentLoaded', () => {
             setupDragDrop('manual-photo-drop', 'manual-photo-input');
-            // APIサーバー接続チェック
-            fetch('/api/auth/settings').then(r => {
-                const ct = r.headers.get('content-type') || '';
-                if (!ct.includes('application/json')) throw new Error('not json');
-            }).catch(() => {
-                const err = document.getElementById('login-err');
-                if (err) {
-                    err.style.display = 'block';
-                    err.innerHTML = 'APIサーバーに接続できません。<br><b>http://localhost:3000/admin.html</b> からアクセスしてください。';
-                }
-            });
+            // APIサーバー接続チェック（リトライ付き）
+            function checkApi(retries) {
+                fetch('/api/auth/settings').then(r => {
+                    const ct = r.headers.get('content-type') || '';
+                    if (!ct.includes('application/json')) throw new Error('not json');
+                }).catch(() => {
+                    if (retries > 0) {
+                        setTimeout(() => checkApi(retries - 1), 2000);
+                    } else {
+                        const err = document.getElementById('login-err');
+                        if (err) {
+                            err.style.display = 'block';
+                            err.innerHTML = 'APIサーバーに接続できません。<br>サーバーが起動しているか確認してください。';
+                        }
+                    }
+                });
+            }
+            checkApi(3);
         });
     </script>
 </body>
