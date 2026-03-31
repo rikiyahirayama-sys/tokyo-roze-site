@@ -5,16 +5,33 @@ const dataDir = path.join(process.cwd(), "data");
 const envPath = path.join(process.cwd(), ".env");
 
 // ===== .env read/write =====
+const ENV_KEYS = [
+    "ADMIN_ID", "ADMIN_PASSWORD", "ADMIN_SESSION_SECRET", "PORT", "SITE_URL",
+    "ANTHROPIC_API_KEY",
+    "TWITTER_API_KEY", "TWITTER_API_SECRET", "TWITTER_ACCESS_TOKEN", "TWITTER_ACCESS_SECRET",
+    "TWITTER_API_KEY_JA", "TWITTER_API_SECRET_JA", "TWITTER_ACCESS_TOKEN_JA", "TWITTER_ACCESS_SECRET_JA",
+    "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHANNEL_ID",
+    "GITHUB_TOKEN", "GITHUB_REPO",
+];
+
 export function readEnv(): Record<string, string> {
-    if (!fs.existsSync(envPath)) return {};
-    const content = fs.readFileSync(envPath, "utf-8");
     const env: Record<string, string> = {};
-    content.split("\n").forEach((line) => {
-        const trimmed = line.trim();
-        if (!trimmed || trimmed.startsWith("#")) return;
-        const idx = trimmed.indexOf("=");
-        if (idx === -1) return;
-        env[trimmed.substring(0, idx).trim()] = trimmed.substring(idx + 1).trim();
+    // .envファイルから読む
+    if (fs.existsSync(envPath)) {
+        const content = fs.readFileSync(envPath, "utf-8");
+        content.split("\n").forEach((line) => {
+            const trimmed = line.trim();
+            if (!trimmed || trimmed.startsWith("#")) return;
+            const idx = trimmed.indexOf("=");
+            if (idx === -1) return;
+            env[trimmed.substring(0, idx).trim()] = trimmed.substring(idx + 1).trim();
+        });
+    }
+    // .envに無いキーはprocess.envから補完（Render.com等のホスティング環境対応）
+    ENV_KEYS.forEach((key) => {
+        if (!env[key] && process.env[key]) {
+            env[key] = process.env[key]!;
+        }
     });
     return env;
 }
