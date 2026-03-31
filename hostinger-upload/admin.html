@@ -884,8 +884,16 @@
                     <div id="weekly-results" style="margin-top:20px;display:none">
                         <h3 style="color:var(--accent-light);margin-bottom:12px">生成結果</h3>
                         <div id="weekly-preview"></div>
-                        <button class="btn btn-success" style="margin-top:16px" onclick="postAllWeekly()">📤
-                            全部投稿する</button>
+                        <div style="margin-top:16px;padding:16px;background:rgba(255,255,255,0.05);border-radius:8px">
+                            <div class="form-group" style="margin-bottom:12px">
+                                <label>📅 投稿開始日（この日から7日間配信）</label>
+                                <input type="date" id="schedule-start-date" style="padding:8px 12px;border-radius:6px;border:1px solid var(--border);background:var(--bg-dark);color:var(--text);width:200px">
+                            </div>
+                            <div style="display:flex;gap:12px;flex-wrap:wrap">
+                                <button class="btn btn-primary" onclick="scheduleWeekly()">📅 予約投稿する</button>
+                                <button class="btn btn-success" onclick="postAllWeekly()">📤 今すぐ全部投稿する</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -951,6 +959,35 @@
         <!-- ===== タブ4: 投稿履歴 ===== -->
         <div id="tab-history" class="tab-content">
             <h2 class="section-title">投稿履歴</h2>
+
+            <!-- 予約投稿一覧 -->
+            <div class="card" style="margin-bottom:24px">
+                <h3 style="color:var(--accent-light);margin-bottom:12px">📅 予約投稿スケジュール</h3>
+                <div class="filter-bar" style="margin-bottom:12px">
+                    <button class="filter-btn active" onclick="filterScheduled('all',this)">全部</button>
+                    <button class="filter-btn" onclick="filterScheduled('twitter_en',this)">X英語</button>
+                    <button class="filter-btn" onclick="filterScheduled('twitter_ja',this)">X日本語</button>
+                    <button class="filter-btn" onclick="filterScheduled('telegram',this)">Telegram</button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>予約日時</th>
+                            <th>プラットフォーム</th>
+                            <th>種別</th>
+                            <th>内容</th>
+                            <th>ステータス</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scheduled-list">
+                        <tr><td colspan="6" style="text-align:center;color:var(--text-muted)">読み込み中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 投稿済み履歴 -->
+            <h3 style="color:var(--accent-light);margin-bottom:12px">📊 投稿済み履歴</h3>
             <div class="filter-bar">
                 <button class="filter-btn active" onclick="filterHistory('all',this)">全部</button>
                 <button class="filter-btn" onclick="filterHistory('twitter_en',this)">X英語</button>
@@ -1361,7 +1398,8 @@
                 container.innerHTML += '<h4 style="color:var(--red);margin:12px 0 8px">X（日本語）</h4>';
                 res.posts.twitter_ja.forEach((p, i) => {
                     const text = typeof p === 'string' ? p : p.text;
-                    container.innerHTML += `<div class="preview-card"><div class="platform">X JA #${i + 1} ${p.day || ''}</div><textarea id="wp-ja-${i}">${escHtml(text)}</textarea><div class="char-count">${text.length}/280</div></div>`;
+                    const typeLabel = p.type === 'customer' ? '👤客' : '📢求人';
+                    container.innerHTML += `<div class="preview-card"><div class="platform">X JA #${i + 1} ${p.day || ''} ${p.time || ''} <span style="background:${p.type === 'customer' ? 'var(--blue)' : 'var(--red)'};padding:2px 8px;border-radius:4px;font-size:11px">${typeLabel}</span></div><textarea id="wp-ja-${i}">${escHtml(text)}</textarea><div class="char-count">${text.length}/280</div></div>`;
                 });
             }
             // Telegram
@@ -1374,35 +1412,72 @@
             }
 
             document.getElementById('weekly-results').style.display = 'block';
+            // デフォルトで次の月曜日を設定
+            const dateInput = document.getElementById('schedule-start-date');
+            const today = new Date();
+            const dayOfWeek = today.getDay();
+            const daysUntilMonday = dayOfWeek === 0 ? 1 : (8 - dayOfWeek);
+            const nextMonday = new Date(today);
+            nextMonday.setDate(today.getDate() + daysUntilMonday);
+            dateInput.value = nextMonday.toISOString().slice(0, 10);
             toast('投稿文を生成しました！');
         }
 
-        async function postAllWeekly() {
-            if (!weeklyPostsData || !confirm2('全投稿をSNSに送信しますか？')) return;
-
-            // テキストエリアの編集を反映
+        function collectWeeklyPosts() {
             const posts = { twitter_en: [], twitter_ja: [], telegram: [] };
             if (weeklyPostsData.twitter_en) {
                 weeklyPostsData.twitter_en.forEach((p, i) => {
                     const el = document.getElementById('wp-en-' + i);
-                    if (el) posts.twitter_en.push(el.value);
+                    if (el) posts.twitter_en.push({ text: el.value, day: p.day, time: p.time });
                 });
             }
             if (weeklyPostsData.twitter_ja) {
                 weeklyPostsData.twitter_ja.forEach((p, i) => {
                     const el = document.getElementById('wp-ja-' + i);
-                    if (el) posts.twitter_ja.push(el.value);
+                    if (el) posts.twitter_ja.push({ text: el.value, day: p.day, time: p.time, type: p.type || 'recruit' });
                 });
             }
             if (weeklyPostsData.telegram) {
                 weeklyPostsData.telegram.forEach((p, i) => {
                     const el = document.getElementById('wp-tg-' + i);
-                    if (el) posts.telegram.push(el.value);
+                    if (el) posts.telegram.push({ text: el.value, day: p.day, time: p.time });
                 });
             }
+            return posts;
+        }
+
+        async function scheduleWeekly() {
+            if (!weeklyPostsData) return;
+            const startDate = document.getElementById('schedule-start-date').value;
+            if (!startDate) { toast('投稿開始日を選択してください', 'warning'); return; }
+            if (!confirm2(`${startDate} から7日間の予約投稿を登録しますか？`)) return;
+
+            const posts = collectWeeklyPosts();
+            toast('予約登録中...', 'warning');
+            const res = await api('/api/sns/schedule', { method: 'POST', body: JSON.stringify({ posts, startDate }) });
+            if (res.success) {
+                toast(`📅 ${res.count}件の予約投稿を登録しました！`);
+                document.getElementById('weekly-results').style.display = 'none';
+                weeklyPostsData = null;
+            } else {
+                toast('エラー: ' + (res.error || ''), 'error');
+            }
+        }
+
+        async function postAllWeekly() {
+            if (!weeklyPostsData || !confirm2('全投稿を今すぐSNSに送信しますか？')) return;
+
+            // テキストエリアの編集を反映
+            const posts = collectWeeklyPosts();
+            // postエンドポイント用にテキストだけの配列に変換
+            const postData = {
+                twitter_en: posts.twitter_en.map(p => p.text),
+                twitter_ja: posts.twitter_ja.map(p => p.text),
+                telegram: posts.telegram.map(p => p.text)
+            };
 
             toast('投稿中...', 'warning');
-            const res = await api('/api/sns/post', { method: 'POST', body: JSON.stringify({ posts }) });
+            const res = await api('/api/sns/post', { method: 'POST', body: JSON.stringify({ posts: postData }) });
             if (res.success) toast('投稿完了しました！');
             else toast('エラーがありました', 'error');
         }
@@ -1662,6 +1737,9 @@
 
         // ===== 投稿履歴 =====
         async function loadHistory(platform) {
+            // 予約投稿も読み込む
+            loadScheduled();
+
             const url = platform && platform !== 'all' ? '/api/sns/history?platform=' + platform : '/api/sns/history';
             const res = await api(url);
             const tbody = document.getElementById('history-list');
@@ -1672,7 +1750,7 @@
             }
             tbody.innerHTML = history.map(h => {
                 const date = new Date(h.createdAt).toLocaleString('ja-JP');
-                const platforms = (h.results || []).map(r => r.platform).join(', ') || h.type || '';
+                const platforms = (h.results || []).map(r => r.platform).join(', ') || h.platform || h.type || '';
                 const text = h.text || (h.results && h.results[0] ? h.results[0].text : '') || h.type || '';
                 const hasError = (h.results || []).some(r => !r.success);
                 return `<tr>
@@ -1684,8 +1762,52 @@
             }).join('');
         }
 
+        const platformNames = { twitter_en: 'X英語', twitter_ja: 'X日本語', telegram: 'Telegram' };
+        const statusLabels = {
+            scheduled: '<span style="color:var(--blue)">📅 予約済み</span>',
+            posted: '<span style="color:var(--green)">✅ 投稿済み</span>',
+            failed: '<span style="color:var(--red)">❌ 失敗</span>',
+            cancelled: '<span style="color:var(--text-muted)">🚫 キャンセル</span>'
+        };
+
+        async function loadScheduled(platform) {
+            const url = platform && platform !== 'all' ? '/api/sns/scheduled?platform=' + platform : '/api/sns/scheduled';
+            const res = await api(url);
+            const tbody = document.getElementById('scheduled-list');
+            const entries = res.entries || [];
+            if (entries.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted)">予約投稿がありません</td></tr>';
+                return;
+            }
+            tbody.innerHTML = entries.map(e => {
+                const date = new Date(e.scheduledAt).toLocaleString('ja-JP');
+                const typeLabel = e.type === 'customer' ? '👤 お客様向け' : e.type === 'recruit' ? '📢 求人' : '';
+                return `<tr>
+      <td style="white-space:nowrap;color:var(--text-muted)">${date}</td>
+      <td>${platformNames[e.platform] || e.platform}</td>
+      <td>${typeLabel}</td>
+      <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml((e.text || '').substring(0, 60))}</td>
+      <td>${statusLabels[e.status] || e.status}</td>
+      <td>${e.status === 'scheduled' ? '<button class="btn btn-sm btn-secondary" onclick="cancelScheduled(' + e.id + ')">キャンセル</button>' : ''}</td>
+    </tr>`;
+            }).join('');
+        }
+
+        async function cancelScheduled(id) {
+            if (!confirm2('この予約投稿をキャンセルしますか？')) return;
+            const res = await api('/api/sns/schedule/cancel', { method: 'POST', body: JSON.stringify({ id }) });
+            if (res.success) { toast('予約をキャンセルしました'); loadScheduled(); }
+            else toast('エラー: ' + (res.error || ''), 'error');
+        }
+
+        function filterScheduled(platform, btn) {
+            btn.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            loadScheduled(platform);
+        }
+
         function filterHistory(platform, btn) {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             loadHistory(platform);
         }

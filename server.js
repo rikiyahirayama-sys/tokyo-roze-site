@@ -35,6 +35,10 @@ app.use('/api/cast', require('./routes/cast'));
 app.use('/api/sns', require('./routes/sns'));
 app.use('/api/blog', require('./routes/blog'));
 
+// ===== 予約投稿スケジューラー復元 =====
+const scheduler = require('./services/scheduler');
+scheduler.restore();
+
 // ===== サーバー起動 =====
 const server = app.listen(PORT);
 server.on('listening', () => {

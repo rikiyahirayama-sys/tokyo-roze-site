@@ -266,13 +266,13 @@ ${topicPrompt}
     {"day": "日曜", "time": "18:00", "text": "..."}
   ],
   "twitter_ja": [
-    {"day": "月曜", "time": "19:00", "text": "日本語ツイート（280字以内）"},
-    {"day": "火曜", "time": "19:00", "text": "..."},
-    {"day": "水曜", "time": "19:00", "text": "..."},
-    {"day": "木曜", "time": "19:00", "text": "..."},
-    {"day": "金曜", "time": "19:00", "text": "..."},
-    {"day": "土曜", "time": "19:00", "text": "..."},
-    {"day": "日曜", "time": "19:00", "text": "..."}
+    {"day": "月曜", "time": "19:00", "type": "recruit", "text": "求人ツイート（280字以内）"},
+    {"day": "火曜", "time": "19:00", "type": "recruit", "text": "..."},
+    {"day": "水曜", "time": "19:00", "type": "recruit", "text": "..."},
+    {"day": "木曜", "time": "19:00", "type": "recruit", "text": "..."},
+    {"day": "金曜", "time": "19:00", "type": "recruit", "text": "..."},
+    {"day": "土曜", "time": "19:00", "type": "recruit", "text": "..."},
+    {"day": "日曜", "time": "19:00", "type": "customer", "text": "お客様向けツイート（280字以内）"}
   ],
   "telegram": [
     {"day": "月曜", "time": "10:00", "text": "Telegram投稿（500〜800字、Markdown形式）"},
@@ -285,10 +285,28 @@ ${topicPrompt}
   ]
 }
 
+■ X英語（twitter_en）の投稿ルール:
+- 外国人のお客様向け。Tokyo Rendaireの魅力、六本木の夜の楽しみ方、サービスの特徴など
+- 必ず #TokyoRendaire を含める
+- tokyorendaire.com へのリンクを適宜含める
+
+■ X日本語（twitter_ja）の投稿ルール:
+- 7本中6本（月〜土）はキャスト求人向け:
+  内容：高バック率（70〜80%）、完全自宅待機、日払い対応、罰金なし等の好条件アピール、
+  働きやすさ紹介、先輩キャストの声（架空OK）、日給シミュレーション（例：日給5万〜10万円以上）
+  ハッシュタグ：#風俗求人 #デリヘル求人 #高収入バイト #六本木 #日払い
+  type: "recruit"
+- 7本中1本（日曜）は日本人のお客様向け:
+  内容：六本木の夜の楽しみ方、お店の高級感、サービスの質の高さ
+  ハッシュタグ：#六本木 #デリヘル #風俗 #東京
+  type: "customer"
+
+■ Telegram の投稿ルール:
+- 外国人のお客様向け。英語でTokyo Rendaireの詳細な紹介
+- Markdown形式、500〜800字
+
 各プラットフォーム必ず7本（毎日1本）生成してください。
-必ず #TokyoRendaire をツイートに含めてください。
 Tokyo Rendaireは東京・六本木の高級デリバリーサービスです。
-tokyorendaire.com へのリンクを適宜含めてください。
 `, 8192);
     } catch (e) {
         return { error: e.message };

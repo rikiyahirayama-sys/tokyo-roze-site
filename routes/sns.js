@@ -11,6 +11,7 @@ const fs = require('fs');
 const claude = require('../services/claude');
 const twitter = require('../services/twitter');
 const telegram = require('../services/telegram');
+const scheduler = require('../services/scheduler');
 
 // データファイルパス
 const historyPath = path.join(__dirname, '..', 'data', 'posts-history.json');
@@ -255,6 +256,43 @@ router.get('/history', (req, res) => {
         // 新しい順
         filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         return res.json({ success: true, history: filtered });
+    } catch (e) {
+        return res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// ===== POST /schedule — 予約投稿を登録 =====
+router.post('/schedule', (req, res) => {
+    try {
+        const { posts, startDate } = req.body;
+        if (!posts || !startDate) {
+            return res.status(400).json({ success: false, error: '投稿データと開始日が必要です' });
+        }
+        const result = scheduler.schedule(posts, startDate);
+        return res.json({ success: true, ...result });
+    } catch (e) {
+        return res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// ===== GET /scheduled — 予約投稿一覧 =====
+router.get('/scheduled', (req, res) => {
+    try {
+        const { platform } = req.query;
+        const entries = scheduler.getScheduled(platform);
+        return res.json({ success: true, entries });
+    } catch (e) {
+        return res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// ===== POST /schedule/cancel — 予約キャンセル =====
+router.post('/schedule/cancel', (req, res) => {
+    try {
+        const { id } = req.body;
+        const cancelled = scheduler.cancel(id);
+        if (cancelled) return res.json({ success: true });
+        return res.status(400).json({ success: false, error: '該当する予約が見つかりません' });
     } catch (e) {
         return res.status(500).json({ success: false, error: e.message });
     }
