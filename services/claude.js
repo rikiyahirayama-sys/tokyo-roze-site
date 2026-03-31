@@ -254,23 +254,38 @@ async function generateWeeklyPosts(topics) {
         return await askJSON(`
 ${topicPrompt}
 
-1週間分のSNS投稿をJSON形式で生成してください:
+1週間分（月〜日、毎日1本ずつ）のSNS投稿をJSON形式で生成してください:
 {
   "twitter_en": [
-    {"day": "Monday", "time": "19:00", "text": "英語ツイート（280字以内）"},
-    {"day": "Tuesday", "time": "20:00", "text": "..."},
-    ...（計7本）
+    {"day": "月曜", "time": "07:00", "text": "英語ツイート（280字以内）"},
+    {"day": "火曜", "time": "12:00", "text": "..."},
+    {"day": "水曜", "time": "07:00", "text": "..."},
+    {"day": "木曜", "time": "21:00", "text": "..."},
+    {"day": "金曜", "time": "12:00", "text": "..."},
+    {"day": "土曜", "time": "09:00", "text": "..."},
+    {"day": "日曜", "time": "18:00", "text": "..."}
   ],
   "twitter_ja": [
-    {"day": "Monday", "time": "19:00", "text": "日本語ツイート（280字以内）"},
-    ...（計3本）
+    {"day": "月曜", "time": "19:00", "text": "日本語ツイート（280字以内）"},
+    {"day": "火曜", "time": "19:00", "text": "..."},
+    {"day": "水曜", "time": "19:00", "text": "..."},
+    {"day": "木曜", "time": "19:00", "text": "..."},
+    {"day": "金曜", "time": "19:00", "text": "..."},
+    {"day": "土曜", "time": "19:00", "text": "..."},
+    {"day": "日曜", "time": "19:00", "text": "..."}
   ],
   "telegram": [
-    {"day": "Monday", "text": "Telegram投稿（500〜800字、Markdown形式）"},
-    ...（計3本）
+    {"day": "月曜", "time": "10:00", "text": "Telegram投稿（500〜800字、Markdown形式）"},
+    {"day": "火曜", "time": "14:00", "text": "..."},
+    {"day": "水曜", "time": "10:00", "text": "..."},
+    {"day": "木曜", "time": "14:00", "text": "..."},
+    {"day": "金曜", "time": "10:00", "text": "..."},
+    {"day": "土曜", "time": "10:00", "text": "..."},
+    {"day": "日曜", "time": "14:00", "text": "..."}
   ]
 }
 
+各プラットフォーム必ず7本（毎日1本）生成してください。
 必ず #TokyoRendaire をツイートに含めてください。
 Tokyo Rendaireは東京・六本木の高級デリバリーサービスです。
 tokyorendaire.com へのリンクを適宜含めてください。
