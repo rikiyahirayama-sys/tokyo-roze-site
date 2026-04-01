@@ -24,7 +24,9 @@ function apiUrl(method) {
 // チャンネルに投稿
 async function postToChannel(text, imagePath) {
     try {
+        console.log(`[Telegram] 投稿開始 text=${(text || '').substring(0, 50)}...`);
         if (!BOT_TOKEN || !CHANNEL_ID) {
+            console.error('[Telegram] Bot TokenまたはChannel ID未設定');
             return { success: false, error: 'Telegram Bot TokenまたはChannel IDが設定されていません' };
         }
 
@@ -40,7 +42,11 @@ async function postToChannel(text, imagePath) {
 
                 const res = await fetch(apiUrl('sendPhoto'), { method: 'POST', body: form });
                 const data = await res.json();
-                if (!data.ok) return { success: false, error: data.description };
+                if (!data.ok) {
+                    console.error('[Telegram] 画像投稿エラー:', data.description);
+                    return { success: false, error: data.description };
+                }
+                console.log(`[Telegram] 画像投稿成功 messageId=${data.result.message_id}`);
                 return { success: true, messageId: String(data.result.message_id) };
             }
         }
@@ -56,9 +62,14 @@ async function postToChannel(text, imagePath) {
             })
         });
         const data = await res.json();
-        if (!data.ok) return { success: false, error: data.description };
+        if (!data.ok) {
+            console.error('[Telegram] API エラー:', data.description);
+            return { success: false, error: data.description };
+        }
+        console.log(`[Telegram] 投稿成功 messageId=${data.result.message_id}`);
         return { success: true, messageId: String(data.result.message_id) };
     } catch (e) {
+        console.error('[Telegram] 投稿失敗:', e.message);
         return { success: false, error: e.message };
     }
 }

@@ -39,6 +39,17 @@ app.use('/api/blog', require('./routes/blog'));
 const scheduler = require('./services/scheduler');
 scheduler.restore();
 
+// ===== API 404ハンドラー（HTMLではなくJSONを返す） =====
+app.use('/api', (req, res) => {
+    res.status(404).json({ success: false, error: `API endpoint not found: ${req.method} ${req.originalUrl}` });
+});
+
+// ===== APIエラーハンドラー（HTMLではなくJSONを返す） =====
+app.use('/api', (err, req, res, next) => {
+    console.error('[API Error]', err.message);
+    res.status(500).json({ success: false, error: err.message || 'Internal server error' });
+});
+
 // ===== サーバー起動 =====
 const server = app.listen(PORT);
 server.on('listening', () => {

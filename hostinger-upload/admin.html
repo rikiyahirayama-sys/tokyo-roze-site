@@ -887,7 +887,8 @@
                         <div style="margin-top:16px;padding:16px;background:rgba(255,255,255,0.05);border-radius:8px">
                             <div class="form-group" style="margin-bottom:12px">
                                 <label>📅 投稿開始日（この日から7日間配信）</label>
-                                <input type="date" id="schedule-start-date" style="padding:8px 12px;border-radius:6px;border:1px solid var(--border);background:var(--bg-dark);color:var(--text);width:200px">
+                                <input type="date" id="schedule-start-date"
+                                    style="padding:8px 12px;border-radius:6px;border:1px solid var(--border);background:var(--bg-dark);color:var(--text);width:200px">
                             </div>
                             <div style="display:flex;gap:12px;flex-wrap:wrap">
                                 <button class="btn btn-primary" onclick="scheduleWeekly()">📅 予約投稿する</button>
@@ -981,7 +982,9 @@
                         </tr>
                     </thead>
                     <tbody id="scheduled-list">
-                        <tr><td colspan="6" style="text-align:center;color:var(--text-muted)">読み込み中...</td></tr>
+                        <tr>
+                            <td colspan="6" style="text-align:center;color:var(--text-muted)">読み込み中...</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>

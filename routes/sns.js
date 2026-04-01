@@ -14,9 +14,18 @@ const telegram = require('../services/telegram');
 const scheduler = require('../services/scheduler');
 
 // データファイルパス
-const historyPath = path.join(__dirname, '..', 'data', 'posts-history.json');
-const draftsPath = path.join(__dirname, '..', 'data', 'drafts.json');
-const castsPath = path.join(__dirname, '..', 'data', 'casts.json');
+const dataDir = path.join(__dirname, '..', 'data');
+const historyPath = path.join(dataDir, 'posts-history.json');
+const draftsPath = path.join(dataDir, 'drafts.json');
+const castsPath = path.join(dataDir, 'casts.json');
+
+// dataディレクトリがなければ作成
+if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+}
+
+// メモリ内履歴キャッシュ（Render.comファイルシステム対応）
+let historyCache = null;
 
 // ファイルアップロード設定
 const storage = multer.diskStorage({
@@ -31,11 +40,35 @@ const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
 
 // データ読み書きヘルパー
 function readJSON(filePath) {
-    if (!fs.existsSync(filePath)) return [];
-    return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    try {
+        if (!fs.existsSync(filePath)) return [];
+        return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    } catch (e) {
+        console.error(`[SNS] JSON読み込みエラー ${filePath}:`, e.message);
+        return [];
+    }
 }
 function writeJSON(filePath, data) {
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
+    try {
+        if (!fs.existsSync(path.dirname(filePath))) {
+            fs.mkdirSync(path.dirname(filePath), { recursive: true });
+        }
+        fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
+    } catch (e) {
+        console.error(`[SNS] JSON書き込みエラー ${filePath}:`, e.message);
+    }
+}
+
+// 履歴読み書き（メモリキャッシュ併用）
+function readHistory() {
+    if (historyCache === null) {
+        historyCache = readJSON(historyPath);
+    }
+    return historyCache;
+}
+function writeHistory(data) {
+    historyCache = data;
+    writeJSON(historyPath, data);
 }
 
 // 遅延関数（SNS投稿間隔用）
@@ -58,12 +91,14 @@ router.post('/post', async (req, res) => {
     try {
         const { posts } = req.body;
         const results = [];
+        console.log('[SNS] 一括投稿開始:', Object.keys(posts || {}));
 
         // X英語
         if (posts.twitter_en && Array.isArray(posts.twitter_en)) {
             for (const post of posts.twitter_en) {
                 const text = typeof post === 'string' ? post : post.text;
                 const r = await twitter.postTweet(text, null, 'en');
+                console.log('[SNS] twitter_en 結果:', r.success ? '✅' : '❌', r.error || '');
                 results.push({ platform: 'twitter_en', text, ...r });
                 await delay(3000);
             }
@@ -74,6 +109,7 @@ router.post('/post', async (req, res) => {
             for (const post of posts.twitter_ja) {
                 const text = typeof post === 'string' ? post : post.text;
                 const r = await twitter.postTweet(text, null, 'ja');
+                console.log('[SNS] twitter_ja 結果:', r.success ? '✅' : '❌', r.error || '');
                 results.push({ platform: 'twitter_ja', text, ...r });
                 await delay(3000);
             }
@@ -84,23 +120,26 @@ router.post('/post', async (req, res) => {
             for (const post of posts.telegram) {
                 const text = typeof post === 'string' ? post : post.text;
                 const r = await telegram.postToChannel(text);
+                console.log('[SNS] telegram 結果:', r.success ? '✅' : '❌', r.error || '');
                 results.push({ platform: 'telegram', text, ...r });
                 await delay(3000);
             }
         }
 
         // 履歴に記録
-        const history = readJSON(historyPath);
+        const history = readHistory();
         history.push({
             id: Date.now(),
             type: 'weekly_batch',
             results,
             createdAt: new Date().toISOString()
         });
-        writeJSON(historyPath, history);
+        writeHistory(history);
+        console.log('[SNS] 履歴保存完了 件数:', history.length);
 
         return res.json({ success: true, results });
     } catch (e) {
+        console.error('[SNS] 一括投稿エラー:', e.message);
         return res.status(500).json({ success: false, error: e.message });
     }
 });
@@ -112,21 +151,25 @@ router.post('/manual', upload.array('images', 5), async (req, res) => {
         const platformList = typeof platforms === 'string' ? JSON.parse(platforms) : (platforms || []);
         const imagePath = (req.files && req.files.length > 0) ? path.join('uploads', req.files[0].filename) : null;
         const results = [];
+        console.log('[SNS] 手動投稿開始 platforms:', platformList, 'image:', imagePath ? 'yes' : 'no');
 
         for (const platform of platformList) {
             switch (platform) {
                 case 'twitter_en': {
                     const r = await twitter.postTweet(text, imagePath, 'en');
+                    console.log('[SNS] twitter_en 結果:', r.success ? '✅' : '❌', r.error || '');
                     results.push({ platform: 'twitter_en', ...r });
                     break;
                 }
                 case 'twitter_ja': {
                     const r = await twitter.postTweet(text, imagePath, 'ja');
+                    console.log('[SNS] twitter_ja 結果:', r.success ? '✅' : '❌', r.error || '');
                     results.push({ platform: 'twitter_ja', ...r });
                     break;
                 }
                 case 'telegram': {
                     const r = await telegram.postToChannel(text, imagePath);
+                    console.log('[SNS] telegram 結果:', r.success ? '✅' : '❌', r.error || '');
                     results.push({ platform: 'telegram', ...r });
                     break;
                 }
@@ -135,7 +178,7 @@ router.post('/manual', upload.array('images', 5), async (req, res) => {
         }
 
         // 履歴に記録
-        const history = readJSON(historyPath);
+        const history = readHistory();
         history.push({
             id: Date.now(),
             type: 'manual',
@@ -144,10 +187,12 @@ router.post('/manual', upload.array('images', 5), async (req, res) => {
             results,
             createdAt: new Date().toISOString()
         });
-        writeJSON(historyPath, history);
+        writeHistory(history);
+        console.log('[SNS] 手動投稿履歴保存 件数:', history.length);
 
         return res.json({ success: true, results });
     } catch (e) {
+        console.error('[SNS] 手動投稿エラー:', e.message);
         return res.status(500).json({ success: false, error: e.message });
     }
 });
@@ -241,7 +286,7 @@ router.get('/drafts', (req, res) => {
 // ===== GET /history — 投稿履歴 =====
 router.get('/history', (req, res) => {
     try {
-        const history = readJSON(historyPath);
+        const history = readHistory();
         const { platform } = req.query;
         let filtered = history;
 
@@ -255,9 +300,11 @@ router.get('/history', (req, res) => {
 
         // 新しい順
         filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        console.log(`[SNS] 履歴取得 ${filtered.length}件`);
         return res.json({ success: true, history: filtered });
     } catch (e) {
-        return res.status(500).json({ success: false, error: e.message });
+        console.error('[SNS] 履歴取得エラー:', e.message);
+        return res.status(500).json({ success: true, history: [] });
     }
 });
 

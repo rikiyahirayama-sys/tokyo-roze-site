@@ -51,8 +51,10 @@ function getClient(account) {
 // ツイート投稿
 async function postTweet(text, imagePath, account = 'en') {
     try {
+        console.log(`[Twitter] 投稿開始 account=${account} text=${text.substring(0, 50)}...`);
         const tw = getClient(account);
         if (!tw) {
+            console.error(`[Twitter] ${account}アカウント未設定`);
             return { success: false, error: `Twitter ${account}アカウントが設定されていません` };
         }
 
@@ -60,14 +62,17 @@ async function postTweet(text, imagePath, account = 'en') {
         if (imagePath) {
             const fullPath = path.resolve(imagePath);
             if (fs.existsSync(fullPath)) {
+                console.log(`[Twitter] 画像アップロード: ${fullPath}`);
                 mediaId = await tw.v1.uploadMedia(fullPath);
             }
         }
 
         const params = mediaId ? { media: { media_ids: [mediaId] } } : {};
         const result = await tw.v2.tweet(text, params);
+        console.log(`[Twitter] 投稿成功 account=${account} tweetId=${result.data.id}`);
         return { success: true, tweetId: result.data.id };
     } catch (e) {
+        console.error(`[Twitter] 投稿失敗 account=${account}:`, e.message);
         return { success: false, error: e.message };
     }
 }

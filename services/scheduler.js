@@ -15,11 +15,24 @@ const historyPath = path.join(__dirname, '..', 'data', 'posts-history.json');
 const timers = new Map();
 
 function readJSON(filePath) {
-    if (!fs.existsSync(filePath)) return [];
-    return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    try {
+        if (!fs.existsSync(filePath)) return [];
+        return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    } catch (e) {
+        console.error(`[Scheduler] JSON読み込みエラー ${filePath}:`, e.message);
+        return [];
+    }
 }
 function writeJSON(filePath, data) {
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
+    try {
+        const dir = path.dirname(filePath);
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+        fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
+    } catch (e) {
+        console.error(`[Scheduler] JSON書き込みエラー ${filePath}:`, e.message);
+    }
 }
 
 // 予約投稿を登録
