@@ -25,15 +25,20 @@ function apiUrl(method) {
 async function postToChannel(text, imagePath) {
     try {
         // テキストの正規化（オブジェクト・配列・数値など文字列以外が渡された場合の対応）
+        console.log(`[Telegram] postToChannel called, text type=${typeof text}, value=`, typeof text === 'string' ? text.substring(0, 30) : text);
         if (Array.isArray(text)) {
-            text = text.map(t => (typeof t === 'object' && t !== null) ? (t.text || t.caption || '') : String(t || '')).join('\n');
+            text = text.map(t => {
+                if (t && typeof t === 'object') return String(t.text || t.caption || JSON.stringify(t));
+                return String(t || '');
+            }).join('\n');
         } else if (text && typeof text === 'object') {
-            text = text.text || text.caption || JSON.stringify(text);
+            const extracted = text.text || text.caption;
+            text = (extracted && typeof extracted === 'string') ? extracted : JSON.stringify(text);
         }
         if (typeof text !== 'string') {
-            text = String(text || '');
+            text = (text !== null && text !== undefined) ? JSON.stringify(text) : '';
         }
-        text = text.trim();
+        text = String(text).trim();
         console.log(`[Telegram] 投稿開始 text=${text.substring(0, 50)}...`);
         if (!BOT_TOKEN || !CHANNEL_ID) {
             console.error('[Telegram] Bot TokenまたはChannel ID未設定');

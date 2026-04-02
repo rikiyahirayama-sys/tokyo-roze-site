@@ -18,10 +18,10 @@ function initClients() {
     const enAccessSecret = (process.env.TWITTER_ACCESS_SECRET || '').trim();
 
     console.log('[Twitter] ENV check EN:', {
-        TWITTER_API_KEY: enKey ? enKey.substring(0, 6) + '...(' + enKey.length + ')' : 'NOT SET',
-        TWITTER_API_SECRET: enSecret ? enSecret.substring(0, 6) + '...(' + enSecret.length + ')' : 'NOT SET',
-        TWITTER_ACCESS_TOKEN: enAccessToken ? enAccessToken.substring(0, 6) + '...(' + enAccessToken.length + ')' : 'NOT SET',
-        TWITTER_ACCESS_SECRET: enAccessSecret ? enAccessSecret.substring(0, 6) + '...(' + enAccessSecret.length + ')' : 'NOT SET',
+        TWITTER_API_KEY: enKey ? enKey.substring(0, 4) + '****(' + enKey.length + ')' : 'NOT SET',
+        TWITTER_API_SECRET: enSecret ? enSecret.substring(0, 4) + '****(' + enSecret.length + ')' : 'NOT SET',
+        TWITTER_ACCESS_TOKEN: enAccessToken ? enAccessToken.substring(0, 4) + '****(' + enAccessToken.length + ')' : 'NOT SET',
+        TWITTER_ACCESS_SECRET: enAccessSecret ? enAccessSecret.substring(0, 4) + '****(' + enAccessSecret.length + ')' : 'NOT SET',
     });
 
     if (enKey && enSecret && enAccessToken && enAccessSecret) {
@@ -43,10 +43,10 @@ function initClients() {
     const jaAccessSecret = (process.env.TWITTER_ACCESS_SECRET_JA || '').trim();
 
     console.log('[Twitter] ENV check JA:', {
-        TWITTER_API_KEY_JA: jaKey ? jaKey.substring(0, 6) + '...(' + jaKey.length + ')' : 'NOT SET',
-        TWITTER_API_SECRET_JA: jaSecret ? jaSecret.substring(0, 6) + '...(' + jaSecret.length + ')' : 'NOT SET',
-        TWITTER_ACCESS_TOKEN_JA: jaAccessToken ? jaAccessToken.substring(0, 6) + '...(' + jaAccessToken.length + ')' : 'NOT SET',
-        TWITTER_ACCESS_SECRET_JA: jaAccessSecret ? jaAccessSecret.substring(0, 6) + '...(' + jaAccessSecret.length + ')' : 'NOT SET',
+        TWITTER_API_KEY_JA: jaKey ? jaKey.substring(0, 4) + '****(' + jaKey.length + ')' : 'NOT SET',
+        TWITTER_API_SECRET_JA: jaSecret ? jaSecret.substring(0, 4) + '****(' + jaSecret.length + ')' : 'NOT SET',
+        TWITTER_ACCESS_TOKEN_JA: jaAccessToken ? jaAccessToken.substring(0, 4) + '****(' + jaAccessToken.length + ')' : 'NOT SET',
+        TWITTER_ACCESS_SECRET_JA: jaAccessSecret ? jaAccessSecret.substring(0, 4) + '****(' + jaAccessSecret.length + ')' : 'NOT SET',
     });
 
     if (jaKey && jaSecret && jaAccessToken && jaAccessSecret) {
