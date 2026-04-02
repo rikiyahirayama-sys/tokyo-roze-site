@@ -152,16 +152,23 @@ async function deleteTweet(tweetId, account = 'en') {
     }
 }
 
-// 接続確認
+// 接続確認（Freeプラン対応: v2.me()が使えないためtweet投稿→即削除で検証）
 async function verifyCredentials(account = 'en') {
     try {
         const tw = getClient(account);
         if (!tw) {
             return { success: false, error: `Twitter ${account}アカウントが設定されていません` };
         }
-        const me = await tw.v2.me();
-        return { success: true, data: me.data };
+        console.log(`[Twitter] verifyCredentials(${account}): posting test tweet...`);
+        const testText = `🔧 API connection test - ${Date.now()}`;
+        const result = await tw.v2.tweet(testText);
+        const tweetId = result.data.id;
+        console.log(`[Twitter] verifyCredentials(${account}): test tweet posted id=${tweetId}, deleting...`);
+        await tw.v2.deleteTweet(tweetId);
+        console.log(`[Twitter] verifyCredentials(${account}): test tweet deleted. Auth OK.`);
+        return { success: true, data: { verified: true, account } };
     } catch (e) {
+        console.error(`[Twitter] verifyCredentials(${account}) failed:`, e.message);
         return { success: false, error: e.message };
     }
 }

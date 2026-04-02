@@ -49,10 +49,14 @@ export async function POST(request: NextRequest) {
                     accessToken: enAccToken,
                     accessSecret: enAccSecret,
                 });
-                console.log("[Twitter Test EN] Client created, calling v2.me()...");
-                const me = await tw.v2.me();
-                console.log("[Twitter Test EN] Success:", me.data.username);
-                return NextResponse.json({ success: true, message: `接続成功: @${me.data.username}` });
+                console.log("[Twitter Test EN] Client created, posting test tweet...");
+                const testText = `🔧 API test - ${Date.now()}`;
+                const tweetResult = await tw.v2.tweet(testText);
+                const tweetId = tweetResult.data.id;
+                console.log("[Twitter Test EN] Tweet posted id=", tweetId, ", deleting...");
+                await tw.v2.deleteTweet(tweetId);
+                console.log("[Twitter Test EN] Test tweet deleted. Auth OK.");
+                return NextResponse.json({ success: true, message: "接続成功（テストツイート投稿・削除OK）" });
             }
             case "twitter_ja": {
                 const jaKey = (process.env.TWITTER_API_KEY_JA || "").trim();
@@ -75,10 +79,14 @@ export async function POST(request: NextRequest) {
                     accessToken: jaAccToken,
                     accessSecret: jaAccSecret,
                 });
-                console.log("[Twitter Test JA] Client created, calling v2.me()...");
-                const meJa = await twJa.v2.me();
-                console.log("[Twitter Test JA] Success:", meJa.data.username);
-                return NextResponse.json({ success: true, message: `接続成功: @${meJa.data.username}` });
+                console.log("[Twitter Test JA] Client created, posting test tweet...");
+                const testTextJa = `🔧 API test - ${Date.now()}`;
+                const tweetResultJa = await twJa.v2.tweet(testTextJa);
+                const tweetIdJa = tweetResultJa.data.id;
+                console.log("[Twitter Test JA] Tweet posted id=", tweetIdJa, ", deleting...");
+                await twJa.v2.deleteTweet(tweetIdJa);
+                console.log("[Twitter Test JA] Test tweet deleted. Auth OK.");
+                return NextResponse.json({ success: true, message: "接続成功（テストツイート投稿・削除OK）" });
             }
             case "telegram": {
                 const tgToken = (process.env.TELEGRAM_BOT_TOKEN || "").trim();

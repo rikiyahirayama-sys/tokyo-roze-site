@@ -141,12 +141,12 @@ router.post('/settings/test', async (req, res) => {
         switch (service) {
             case 'twitter_en': {
                 const result = await twitter.verifyCredentials('en');
-                if (result.success) return res.json({ success: true, message: `接続成功: @${result.data.username}` });
+                if (result.success) return res.json({ success: true, message: '接続成功（テストツイート投稿・削除OK）' });
                 return res.json({ success: false, message: `エラー: ${result.error}` });
             }
             case 'twitter_ja': {
                 const result = await twitter.verifyCredentials('ja');
-                if (result.success) return res.json({ success: true, message: `接続成功: @${result.data.username}` });
+                if (result.success) return res.json({ success: true, message: '接続成功（テストツイート投稿・削除OK）' });
                 return res.json({ success: false, message: `エラー: ${result.error}` });
             }
             case 'telegram': {
