@@ -29,45 +29,74 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json({ success: true, message: "接続成功" });
             }
             case "twitter_en": {
-                if (!process.env.TWITTER_API_KEY || !process.env.TWITTER_API_SECRET ||
-                    !process.env.TWITTER_ACCESS_TOKEN || !process.env.TWITTER_ACCESS_SECRET) {
+                const enKey = (process.env.TWITTER_API_KEY || "").trim();
+                const enSecret = (process.env.TWITTER_API_SECRET || "").trim();
+                const enAccToken = (process.env.TWITTER_ACCESS_TOKEN || "").trim();
+                const enAccSecret = (process.env.TWITTER_ACCESS_SECRET || "").trim();
+                console.log("[Twitter Test EN] ENV:", {
+                    API_KEY: enKey ? enKey.substring(0, 4) + "**(" + enKey.length + ")" : "NOT SET",
+                    API_SECRET: enSecret ? enSecret.substring(0, 4) + "**(" + enSecret.length + ")" : "NOT SET",
+                    ACCESS_TOKEN: enAccToken ? enAccToken.substring(0, 4) + "**(" + enAccToken.length + ")" : "NOT SET",
+                    ACCESS_SECRET: enAccSecret ? enAccSecret.substring(0, 4) + "**(" + enAccSecret.length + ")" : "NOT SET",
+                });
+                if (!enKey || !enSecret || !enAccToken || !enAccSecret) {
                     return NextResponse.json({ success: false, message: "エラー: Twitter(EN) APIキーが設定されていません" });
                 }
                 const { TwitterApi } = await import("twitter-api-v2");
                 const tw = new TwitterApi({
-                    appKey: process.env.TWITTER_API_KEY,
-                    appSecret: process.env.TWITTER_API_SECRET,
-                    accessToken: process.env.TWITTER_ACCESS_TOKEN,
-                    accessSecret: process.env.TWITTER_ACCESS_SECRET,
+                    appKey: enKey,
+                    appSecret: enSecret,
+                    accessToken: enAccToken,
+                    accessSecret: enAccSecret,
                 });
+                console.log("[Twitter Test EN] Client created, calling v2.me()...");
                 const me = await tw.v2.me();
+                console.log("[Twitter Test EN] Success:", me.data.username);
                 return NextResponse.json({ success: true, message: `接続成功: @${me.data.username}` });
             }
             case "twitter_ja": {
-                if (!process.env.TWITTER_API_KEY_JA || !process.env.TWITTER_API_SECRET_JA ||
-                    !process.env.TWITTER_ACCESS_TOKEN_JA || !process.env.TWITTER_ACCESS_SECRET_JA) {
+                const jaKey = (process.env.TWITTER_API_KEY_JA || "").trim();
+                const jaSecret = (process.env.TWITTER_API_SECRET_JA || "").trim();
+                const jaAccToken = (process.env.TWITTER_ACCESS_TOKEN_JA || "").trim();
+                const jaAccSecret = (process.env.TWITTER_ACCESS_SECRET_JA || "").trim();
+                console.log("[Twitter Test JA] ENV:", {
+                    API_KEY_JA: jaKey ? jaKey.substring(0, 4) + "**(" + jaKey.length + ")" : "NOT SET",
+                    API_SECRET_JA: jaSecret ? jaSecret.substring(0, 4) + "**(" + jaSecret.length + ")" : "NOT SET",
+                    ACCESS_TOKEN_JA: jaAccToken ? jaAccToken.substring(0, 4) + "**(" + jaAccToken.length + ")" : "NOT SET",
+                    ACCESS_SECRET_JA: jaAccSecret ? jaAccSecret.substring(0, 4) + "**(" + jaAccSecret.length + ")" : "NOT SET",
+                });
+                if (!jaKey || !jaSecret || !jaAccToken || !jaAccSecret) {
                     return NextResponse.json({ success: false, message: "エラー: Twitter(JA) APIキーが設定されていません" });
                 }
-                const { TwitterApi } = await import("twitter-api-v2");
-                const tw = new TwitterApi({
-                    appKey: process.env.TWITTER_API_KEY_JA,
-                    appSecret: process.env.TWITTER_API_SECRET_JA,
-                    accessToken: process.env.TWITTER_ACCESS_TOKEN_JA,
-                    accessSecret: process.env.TWITTER_ACCESS_SECRET_JA,
+                const { TwitterApi: TwitterApiJA } = await import("twitter-api-v2");
+                const twJa = new TwitterApiJA({
+                    appKey: jaKey,
+                    appSecret: jaSecret,
+                    accessToken: jaAccToken,
+                    accessSecret: jaAccSecret,
                 });
-                const me = await tw.v2.me();
-                return NextResponse.json({ success: true, message: `接続成功: @${me.data.username}` });
+                console.log("[Twitter Test JA] Client created, calling v2.me()...");
+                const meJa = await twJa.v2.me();
+                console.log("[Twitter Test JA] Success:", meJa.data.username);
+                return NextResponse.json({ success: true, message: `接続成功: @${meJa.data.username}` });
             }
             case "telegram": {
-                if (!process.env.TELEGRAM_BOT_TOKEN) {
+                const tgToken = (process.env.TELEGRAM_BOT_TOKEN || "").trim();
+                const tgChannel = (process.env.TELEGRAM_CHANNEL_ID || "").trim();
+                console.log("[Telegram Test] ENV:", {
+                    BOT_TOKEN: tgToken ? tgToken.substring(0, 4) + "**(" + tgToken.length + ")" : "NOT SET",
+                    CHANNEL_ID: tgChannel ? tgChannel.substring(0, 4) + "**(" + tgChannel.length + ")" : "NOT SET",
+                });
+                if (!tgToken) {
                     return NextResponse.json({ success: false, message: "エラー: Telegram Bot Tokenが設定されていません" });
                 }
-                const res = await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/getMe`);
-                const data = await res.json();
-                if (!data.ok) {
-                    return NextResponse.json({ success: false, message: `エラー: ${data.description}` });
+                const tgRes = await fetch(`https://api.telegram.org/bot${tgToken}/getMe`);
+                const tgData = await tgRes.json();
+                if (!tgData.ok) {
+                    return NextResponse.json({ success: false, message: `エラー: ${tgData.description}` });
                 }
-                return NextResponse.json({ success: true, message: `接続成功: @${data.result.username}` });
+                console.log("[Telegram Test] Success:", tgData.result.username);
+                return NextResponse.json({ success: true, message: `接続成功: @${tgData.result.username}` });
             }
             case "github": {
                 if (!process.env.GITHUB_TOKEN || !process.env.GITHUB_REPO) {

@@ -1,11 +1,26 @@
 // ============================================
 // Telegram Bot サービス
 // チャンネル投稿（テキスト・画像）
+// Express / Next.js 両対応
 // ============================================
-const fetch = require('node-fetch');
 const fs = require('fs');
 const path = require('path');
-const FormData = require('form-data');
+
+// Next.js環境ではglobalThis.fetchを使用、Express環境ではnode-fetchにフォールバック
+let _fetch;
+try {
+    _fetch = globalThis.fetch || require('node-fetch');
+} catch (e) {
+    _fetch = globalThis.fetch;
+}
+
+// Next.js環境ではform-dataが不要な場合がある（画像投稿はfs.createReadStreamベースで行う）
+let _FormData;
+try {
+    _FormData = require('form-data');
+} catch (e) {
+    _FormData = null;
+}
 
 let BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
 let CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID || '';
@@ -40,22 +55,31 @@ async function postToChannel(text, imagePath) {
         }
         text = String(text).trim();
         console.log(`[Telegram] 投稿開始 text=${text.substring(0, 50)}...`);
-        if (!BOT_TOKEN || !CHANNEL_ID) {
-            console.error('[Telegram] Bot TokenまたはChannel ID未設定');
+        // 環境変数の読み込み確認
+        const currentToken = BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN || '';
+        const currentChannel = CHANNEL_ID || process.env.TELEGRAM_CHANNEL_ID || '';
+        if (!currentToken || !currentChannel) {
+            console.error('[Telegram] Bot TokenまたはChannel ID未設定', {
+                BOT_TOKEN: currentToken ? currentToken.substring(0, 4) + '**(' + currentToken.length + ')' : 'NOT SET',
+                CHANNEL_ID: currentChannel || 'NOT SET'
+            });
             return { success: false, error: 'Telegram Bot TokenまたはChannel IDが設定されていません' };
         }
+        // モジュールレベル変数が空の場合、process.envから再取得
+        if (!BOT_TOKEN) BOT_TOKEN = currentToken;
+        if (!CHANNEL_ID) CHANNEL_ID = currentChannel;
 
         if (imagePath) {
             const fullPath = path.resolve(imagePath);
-            if (fs.existsSync(fullPath)) {
-                // 画像付き投稿
-                const form = new FormData();
+            if (fs.existsSync(fullPath) && _FormData) {
+                // 画像付き投稿（form-dataが利用可能な場合のみ）
+                const form = new _FormData();
                 form.append('chat_id', CHANNEL_ID);
                 form.append('caption', text);
                 form.append('parse_mode', 'Markdown');
                 form.append('photo', fs.createReadStream(fullPath));
 
-                const res = await fetch(apiUrl('sendPhoto'), { method: 'POST', body: form });
+                const res = await _fetch(apiUrl('sendPhoto'), { method: 'POST', body: form });
                 const data = await res.json();
                 if (!data.ok) {
                     console.error('[Telegram] 画像投稿エラー:', data.description);
@@ -67,7 +91,7 @@ async function postToChannel(text, imagePath) {
         }
 
         // テキストのみ投稿（Markdownパースエラー時はプレーンテキストで再試行）
-        let res = await fetch(apiUrl('sendMessage'), {
+        let res = await _fetch(apiUrl('sendMessage'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -79,7 +103,7 @@ async function postToChannel(text, imagePath) {
         let data = await res.json();
         if (!data.ok && data.description && data.description.includes("can't parse")) {
             console.log('[Telegram] Markdownパースエラー、プレーンテキストで再試行');
-            res = await fetch(apiUrl('sendMessage'), {
+            res = await _fetch(apiUrl('sendMessage'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -107,7 +131,7 @@ async function getMe() {
         if (!BOT_TOKEN) {
             return { success: false, error: 'Telegram Bot Tokenが設定されていません' };
         }
-        const res = await fetch(apiUrl('getMe'));
+        const res = await _fetch(apiUrl('getMe'));
         const data = await res.json();
         if (!data.ok) return { success: false, error: data.description };
         return { success: true, data: data.result };

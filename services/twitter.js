@@ -70,8 +70,14 @@ function reinitialize() {
     initClients();
 }
 
-// アカウント選択
+// アカウント選択（未初期化の場合は再初期化を試みる）
 function getClient(account) {
+    // Next.js環境ではモジュールキャッシュが効かない場合がある。
+    // クライアントがnullなら再初期化を試みる
+    if (!clientEN && !clientJA) {
+        console.log('[Twitter] getClient: clients not initialized, re-initializing...');
+        initClients();
+    }
     if (account === 'ja') return clientJA;
     return clientEN;
 }
@@ -80,10 +86,16 @@ function getClient(account) {
 async function postTweet(text, imagePath, account = 'en') {
     try {
         // テキストの正規化
-        if (text && typeof text === 'object') {
-            text = text.text || text.caption || JSON.stringify(text);
+        if (Array.isArray(text)) {
+            text = text.map(t => (t && typeof t === 'object') ? String(t.text || t.caption || JSON.stringify(t)) : String(t || '')).join('\n');
+        } else if (text && typeof text === 'object') {
+            const extracted = text.text || text.caption;
+            text = (extracted && typeof extracted === 'string') ? extracted : JSON.stringify(text);
         }
-        text = String(text || '').trim();
+        if (typeof text !== 'string') {
+            text = (text !== null && text !== undefined) ? JSON.stringify(text) : '';
+        }
+        text = String(text).trim();
         console.log(`[Twitter] 投稿開始 account=${account} text=${text.substring(0, 50)}...`);
         const tw = getClient(account);
         if (!tw) {
