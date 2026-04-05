@@ -327,6 +327,68 @@
             color: #333
         }
 
+        .toast-info {
+            background: #2196F3
+        }
+
+        /* 処理中バナー */
+        #progress-banner {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10001;
+            padding: 12px 20px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            animation: slideDown .3s;
+        }
+
+        #progress-banner.processing {
+            background: linear-gradient(90deg, #2196F3, #1976D2);
+        }
+
+        #progress-banner.done {
+            background: linear-gradient(90deg, var(--green), #388E3C);
+        }
+
+        #progress-banner.error {
+            background: linear-gradient(90deg, var(--red), #C62828);
+        }
+
+        #progress-banner .spinner-inline {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1
+            }
+        }
+
         @keyframes slideIn {
             from {
                 transform: translateX(100px);
@@ -804,6 +866,7 @@
 <body>
 
     <!-- ===== トースト通知コンテナ ===== -->
+    <div id="progress-banner"></div>
     <div id="toast-container"></div>
 
     <!-- ===== ログイン画面 ===== -->
@@ -891,8 +954,8 @@
                                     style="padding:8px 12px;border-radius:6px;border:1px solid var(--border);background:var(--bg-dark);color:var(--text);width:200px">
                             </div>
                             <div style="display:flex;gap:12px;flex-wrap:wrap">
-                                <button class="btn btn-primary" onclick="scheduleWeekly()">📅 予約投稿する</button>
-                                <button class="btn btn-success" onclick="postAllWeekly()">📤 今すぐ全部投稿する</button>
+                                <button class="btn btn-primary" onclick="scheduleWeekly()" id="btn-schedule-weekly">📅 予約投稿する</button>
+                                <button class="btn btn-success" onclick="postAllWeekly()" id="btn-post-all">📤 今すぐ全部投稿する</button>
                             </div>
                         </div>
                     </div>
@@ -1144,6 +1207,23 @@
             setTimeout(() => el.remove(), 3500);
         }
 
+        function showBanner(msg, type = 'processing') {
+            const banner = document.getElementById('progress-banner');
+            banner.className = type;
+            if (type === 'processing') {
+                banner.innerHTML = '<span class="spinner-inline"></span>' + msg;
+            } else {
+                banner.innerHTML = msg;
+            }
+            banner.style.display = 'block';
+            if (type !== 'processing') {
+                setTimeout(() => { banner.style.display = 'none'; }, 4000);
+            }
+        }
+        function hideBanner() {
+            document.getElementById('progress-banner').style.display = 'none';
+        }
+
         async function api(url, opts = {}) {
             try {
                 const res = await fetch(API + url, {
@@ -1159,6 +1239,11 @@
                 }
                 const ct = res.headers.get('content-type') || '';
                 if (!ct.includes('application/json')) {
+                    console.error('[API] Non-JSON response:', res.status, ct, url);
+                    // HTMLが返ってきた場合はフォールバック
+                    if (ct.includes('text/html') || res.status === 404) {
+                        return { success: false, error: 'APIエンドポイントが見つかりません: ' + url };
+                    }
                     toast('APIサーバーに接続できません。管理画面はExpressサーバー経由でアクセスしてください。', 'error');
                     return { success: false, error: 'APIサーバー未接続' };
                 }
@@ -1378,12 +1463,15 @@
         // ===== SNS投稿 =====
         async function generateWeeklyPosts() {
             const btn = document.getElementById('btn-generate-weekly');
-            setLoading(btn, true);
+            btn.disabled = true;
+            btn.innerHTML = '⏳ 生成中...';
+            showBanner('🤖 AIが投稿文を生成中です... しばらくお待ちください', 'processing');
             const topics = document.getElementById('weekly-topics').value;
             const res = await api('/api/sns/generate', { method: 'POST', body: JSON.stringify({ topics }) });
-            setLoading(btn, false);
+            btn.disabled = false;
+            btn.innerHTML = '🤖 生成する';
 
-            if (!res.success) { toast(res.error || '⚠️ APIキーが未設定です。設定タブから設定してください', 'error'); return; }
+            if (!res.success) { hideBanner(); showBanner('❌ 生成失敗: ' + (res.error || 'APIキー未設定'), 'error'); return; }
 
             weeklyPostsData = res.posts;
             const container = document.getElementById('weekly-preview');
@@ -1424,7 +1512,7 @@
             const nextMonday = new Date(today);
             nextMonday.setDate(today.getDate() + daysUntilMonday);
             dateInput.value = nextMonday.toISOString().slice(0, 10);
-            toast('投稿文を生成しました！');
+            showBanner('✅ 投稿文の生成が完了しました！', 'done');
         }
 
         function collectWeeklyPosts() {
@@ -1456,20 +1544,29 @@
             if (!startDate) { toast('投稿開始日を選択してください', 'warning'); return; }
             if (!confirm2(`${startDate} から7日間の予約投稿を登録しますか？`)) return;
 
+            const btn = document.getElementById('btn-schedule-weekly');
+            btn.disabled = true;
+            btn.innerHTML = '⏳ 登録中...';
             const posts = collectWeeklyPosts();
-            toast('予約登録中...', 'warning');
+            showBanner('📅 予約投稿を登録中...', 'processing');
             const res = await api('/api/sns/schedule', { method: 'POST', body: JSON.stringify({ posts, startDate }) });
+            btn.disabled = false;
+            btn.innerHTML = '📅 予約投稿する';
             if (res.success) {
-                toast(`📅 ${res.count}件の予約投稿を登録しました！`);
+                showBanner('✅ ' + res.count + '件の予約投稿を登録しました！', 'done');
                 document.getElementById('weekly-results').style.display = 'none';
                 weeklyPostsData = null;
             } else {
-                toast('エラー: ' + (res.error || ''), 'error');
+                showBanner('❌ 予約登録エラー: ' + (res.error || ''), 'error');
             }
         }
 
         async function postAllWeekly() {
             if (!weeklyPostsData || !confirm2('全投稿を今すぐSNSに送信しますか？')) return;
+
+            const btn = document.getElementById('btn-post-all');
+            btn.disabled = true;
+            btn.innerHTML = '⏳ 投稿中...';
 
             // テキストエリアの編集を反映
             const posts = collectWeeklyPosts();
@@ -1480,10 +1577,22 @@
                 telegram: posts.telegram.map(p => p.text)
             };
 
-            toast('投稿中...', 'warning');
+            const total = postData.twitter_en.length + postData.twitter_ja.length + postData.telegram.length;
+            showBanner('⏳ ' + total + '件の投稿を送信中... 他のタブで作業しても大丈夫です', 'processing');
             const res = await api('/api/sns/post', { method: 'POST', body: JSON.stringify({ posts: postData }) });
-            if (res.success) toast('投稿完了しました！');
-            else toast('エラーがありました', 'error');
+            btn.disabled = false;
+            btn.innerHTML = '📤 今すぐ全部投稿する';
+            if (res.success) {
+                const ok = (res.results || []).filter(r => r.success).length;
+                const ng = (res.results || []).filter(r => !r.success).length;
+                if (ng === 0) {
+                    showBanner('✅ 全' + ok + '件の投稿が完了しました！', 'done');
+                } else {
+                    showBanner('⚠️ 投稿完了: 成功 ' + ok + '件 / 失敗 ' + ng + '件', 'error');
+                }
+            } else {
+                showBanner('❌ 投稿エラー: ' + (res.error || '不明なエラー'), 'error');
+            }
         }
 
         // 手動投稿
@@ -1511,13 +1620,26 @@
             form.append('platforms', JSON.stringify(platforms));
             manualPhotoFiles.forEach(f => form.append('images', f));
 
-            toast('投稿中...', 'warning');
+            showBanner('⏳ 手動投稿を送信中...', 'processing');
+            const postManualBtn = event ? event.target : null;
+            if (postManualBtn) { postManualBtn.disabled = true; postManualBtn.innerHTML = '⏳ 投稿中...'; }
             try {
                 const res = await fetch('/api/sns/manual', { method: 'POST', body: form });
                 const data = await res.json();
-                if (data.success) { toast('投稿しました！'); document.getElementById('manual-text').value = ''; }
-                else toast('エラー: ' + (data.error || ''), 'error');
-            } catch (e) { toast('通信エラー', 'error'); }
+                if (data.success) {
+                    const ok = (data.results || []).filter(r => r.success).length;
+                    const ng = (data.results || []).filter(r => !r.success).length;
+                    if (ng === 0) {
+                        showBanner('✅ 投稿が完了しました！', 'done');
+                    } else {
+                        showBanner('⚠️ 投稿完了: 成功 ' + ok + '件 / 失敗 ' + ng + '件', 'error');
+                    }
+                    document.getElementById('manual-text').value = '';
+                } else {
+                    showBanner('❌ 投稿エラー: ' + (data.error || ''), 'error');
+                }
+            } catch (e) { showBanner('❌ 通信エラー: ' + e.message, 'error'); }
+            if (postManualBtn) { postManualBtn.disabled = false; postManualBtn.innerHTML = '📤 投稿する'; }
         }
 
         async function saveDraft() {

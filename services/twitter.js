@@ -127,7 +127,9 @@ async function postTweet(text, imagePath, account = 'en') {
         if (rateLimit) console.error(`[Twitter] レートリミット: ${rateLimit}`);
         // よくあるエラーの日本語説明を付加
         let detail = e.message;
-        if (e.code === 403 || e.statusCode === 403) {
+        if (e.code === 402 || e.statusCode === 402) {
+            detail += ' （課金エラー: X API Free planではツイート投稿に制限があります。Developer PortalでBasicプラン以上にアップグレードしてください）';
+        } else if (e.code === 403 || e.statusCode === 403) {
             detail += ' （権限エラー: X Developer PortalでApp permissionsがRead and Writeになっているか確認し、Access Tokenを再生成してください）';
         } else if (e.code === 429 || e.statusCode === 429) {
             detail += ' （レートリミット: しばらく待ってから再試行してください）';
