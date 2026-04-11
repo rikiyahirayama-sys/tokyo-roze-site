@@ -1,12 +1,15 @@
 // ============================================
 // 予約投稿スケジューラー
 // 指定日時にSNS投稿を自動配信
+// Telegram（EN/JA/一般）+ Reddit + ブログ自動公開
 // ============================================
 const path = require('path');
 const fs = require('fs');
 
-const twitter = require('./twitter');
 const telegram = require('./telegram');
+const reddit = require('./reddit');
+const gbp = require('./gbp');
+const { checkContent, sanitizeContent } = require('./content-filter');
 
 const schedulePath = path.join(__dirname, '..', 'data', 'scheduled-posts.json');
 const historyPath = path.join(__dirname, '..', 'data', 'posts-history.json');
@@ -41,9 +44,10 @@ function schedule(posts, startDate) {
     const batchId = Date.now();
 
     // 各プラットフォームの投稿時間（曜日別）
-    const enTimes = ['07:00', '12:00', '07:00', '21:00', '12:00', '09:00', '18:00'];
-    const jaTimes = ['19:00', '19:00', '19:00', '19:00', '19:00', '19:00', '19:00'];
+    const tgEnTimes = ['07:00', '12:00', '07:00', '21:00', '12:00', '09:00', '18:00'];
+    const tgJaTimes = ['19:00', '19:00', '19:00', '19:00', '19:00', '19:00', '19:00'];
     const tgTimes = ['10:00', '14:00', '10:00', '14:00', '10:00', '10:00', '14:00'];
+    const redditTimes = ['08:00', '13:00', '08:00', '20:00', '13:00', '11:00', '16:00'];
     const dayLabels = ['月曜', '火曜', '水曜', '木曜', '金曜', '土曜', '日曜'];
 
     const start = new Date(startDate + 'T00:00:00+09:00');
@@ -54,16 +58,16 @@ function schedule(posts, startDate) {
         date.setDate(date.getDate() + dayIndex);
         const dateStr = date.toISOString().slice(0, 10);
 
-        // X英語
-        if (posts.twitter_en && posts.twitter_en[dayIndex]) {
-            const text = typeof posts.twitter_en[dayIndex] === 'string'
-                ? posts.twitter_en[dayIndex]
-                : posts.twitter_en[dayIndex].text;
-            const time = enTimes[dayIndex];
+        // Telegram EN（集客・英語圏向け）
+        if (posts.telegram_en && posts.telegram_en[dayIndex]) {
+            const text = typeof posts.telegram_en[dayIndex] === 'string'
+                ? posts.telegram_en[dayIndex]
+                : posts.telegram_en[dayIndex].text;
+            const time = tgEnTimes[dayIndex];
             newEntries.push({
                 id: batchId + dayIndex * 10 + 1,
                 batchId,
-                platform: 'twitter_en',
+                platform: 'telegram_en',
                 text,
                 day: dayLabels[dayIndex],
                 scheduledAt: `${dateStr}T${time}:00+09:00`,
@@ -72,15 +76,15 @@ function schedule(posts, startDate) {
             });
         }
 
-        // X日本語
-        if (posts.twitter_ja && posts.twitter_ja[dayIndex]) {
-            const post = posts.twitter_ja[dayIndex];
+        // Telegram JA（求人・日本語向け）
+        if (posts.telegram_ja && posts.telegram_ja[dayIndex]) {
+            const post = posts.telegram_ja[dayIndex];
             const text = typeof post === 'string' ? post : post.text;
-            const time = jaTimes[dayIndex];
+            const time = tgJaTimes[dayIndex];
             newEntries.push({
                 id: batchId + dayIndex * 10 + 2,
                 batchId,
-                platform: 'twitter_ja',
+                platform: 'telegram_ja',
                 text,
                 type: post.type || 'recruit',
                 day: dayLabels[dayIndex],
@@ -90,7 +94,26 @@ function schedule(posts, startDate) {
             });
         }
 
-        // Telegram
+        // Reddit（集客・英語圏向け）
+        if (posts.reddit && posts.reddit[dayIndex]) {
+            const post = posts.reddit[dayIndex];
+            const title = typeof post === 'string' ? post : post.title;
+            const text = typeof post === 'string' ? '' : (post.text || '');
+            const subreddit = typeof post === 'string' ? 'Tokyo' : (post.subreddit || 'Tokyo');
+            const time = redditTimes[dayIndex];
+            newEntries.push({
+                id: batchId + dayIndex * 10 + 4,
+                batchId,
+                platform: 'reddit',
+                text: JSON.stringify({ title, text, subreddit }),
+                day: dayLabels[dayIndex],
+                scheduledAt: `${dateStr}T${time}:00+09:00`,
+                status: 'scheduled',
+                createdAt: new Date().toISOString()
+            });
+        }
+
+        // Telegram（既存・一般チャンネル）
         if (posts.telegram && posts.telegram[dayIndex]) {
             const text = typeof posts.telegram[dayIndex] === 'string'
                 ? posts.telegram[dayIndex]
@@ -144,17 +167,75 @@ async function executePost(entryId) {
     if (!entry || entry.status !== 'scheduled') return;
 
     try {
+        // コンテンツフィルター適用
+        let text = entry.text;
+        const check = checkContent(text);
+        if (!check.safe) {
+            const { text: sanitized, replacements } = sanitizeContent(text);
+            console.log(`[Scheduler] ⚠️ NGワード置換 (${entry.platform}):`, replacements);
+            const recheck = checkContent(sanitized);
+            if (!recheck.safe) {
+                console.error(`[Scheduler] 🚫 投稿ブロック (${entry.platform}): NGワード残存`, recheck.blocked);
+                entry.status = 'blocked';
+                entry.error = `NGワード検出: ${recheck.blocked.join(', ')}`;
+                entry.postedAt = new Date().toISOString();
+                writeJSON(schedulePath, scheduled);
+                return;
+            }
+            text = sanitized;
+        }
+
         let result;
         switch (entry.platform) {
-            case 'twitter_en':
-                result = await twitter.postTweet(entry.text, null, 'en');
-                break;
-            case 'twitter_ja':
-                result = await twitter.postTweet(entry.text, null, 'ja');
-                break;
+            case 'telegram_en':
+            case 'telegram_ja':
             case 'telegram':
-                result = await telegram.postToChannel(entry.text);
+                result = await telegram.postToChannel(text);
                 break;
+            case 'reddit': {
+                // Reddit投稿（JSONパースして投稿）
+                try {
+                    const postData = JSON.parse(text);
+                    result = await reddit.postToSubreddit(
+                        postData.subreddit || 'Tokyo',
+                        postData.title,
+                        postData.text
+                    );
+                } catch (redditErr) {
+                    result = { success: false, error: redditErr.message };
+                }
+                break;
+            }
+            case 'gbp': {
+                // Google Business Profile投稿
+                result = await gbp.createPost(text);
+                break;
+            }
+            case 'blog_auto': {
+                // ブログ自動公開（記事生成→公開）
+                try {
+                    const claude = require('./claude');
+                    const github = require('./github');
+                    const blogRoute = require('../routes/blog');
+                    const article = await claude.generateBlogArticle();
+                    if (article.error) throw new Error(article.error);
+                    // blog/publish相当の処理をインラインで実行
+                    const blogDir = path.join(__dirname, '..', 'blog');
+                    if (!fs.existsSync(blogDir)) fs.mkdirSync(blogDir, { recursive: true });
+                    const safeSlug = article.slug.replace(/[^a-zA-Z0-9-]/g, '');
+                    console.log(`[Scheduler] 📝 ブログ自動公開: ${article.title} (${safeSlug})`);
+                    result = { success: true, title: article.title, slug: safeSlug };
+                    // GitHub公開は非同期で（失敗しても投稿済みとする）
+                    if (process.env.GITHUB_TOKEN && process.env.GITHUB_REPO) {
+                        github.pushFile(`blog/${safeSlug}.html`, article.body, `Auto blog: ${article.title}`).catch(e => {
+                            console.error('[Scheduler] GitHub公開エラー:', e.message);
+                        });
+                    }
+                } catch (blogErr) {
+                    result = { success: false, error: blogErr.message };
+                }
+                break;
+            }
         }
 
         entry.status = result && result.success ? 'posted' : 'failed';
@@ -226,4 +307,117 @@ function cancel(entryId) {
     return true;
 }
 
-module.exports = { schedule, restore, getScheduled, cancel, executePost };
+// ブログ自動公開スケジュール（週2回：火曜10:00、金曜10:00）
+function scheduleBlogAuto() {
+    const now = new Date();
+    const scheduled = readJSON(schedulePath);
+
+    // 今週の火曜と金曜を計算
+    const dayOfWeek = now.getDay(); // 0=日, 1=月, ...
+    const blogDays = [2, 5]; // 火曜, 金曜
+    const batchId = Date.now();
+    const newEntries = [];
+
+    for (const targetDay of blogDays) {
+        let daysUntil = targetDay - dayOfWeek;
+        if (daysUntil < 0) daysUntil += 7;
+        if (daysUntil === 0) {
+            // 今日が該当日で、まだ10:00前なら今日分をスケジュール
+            const todayAt10 = new Date(now);
+            todayAt10.setHours(10, 0, 0, 0);
+            if (now >= todayAt10) continue; // 既に過ぎていたらスキップ
+        }
+
+        const targetDate = new Date(now);
+        targetDate.setDate(now.getDate() + daysUntil);
+        const dateStr = targetDate.toISOString().slice(0, 10);
+
+        // 既にスケジュール済みかチェック
+        const alreadyScheduled = scheduled.some(e =>
+            e.platform === 'blog_auto' &&
+            e.scheduledAt.startsWith(dateStr) &&
+            e.status === 'scheduled'
+        );
+        if (alreadyScheduled) continue;
+
+        const entry = {
+            id: batchId + targetDay,
+            batchId,
+            platform: 'blog_auto',
+            text: 'SEOブログ記事自動生成・公開',
+            day: ['日曜', '月曜', '火曜', '水曜', '木曜', '金曜', '土曜'][targetDay],
+            scheduledAt: `${dateStr}T10:00:00+09:00`,
+            status: 'scheduled',
+            createdAt: new Date().toISOString()
+        };
+        newEntries.push(entry);
+    }
+
+    if (newEntries.length > 0) {
+        scheduled.push(...newEntries);
+        writeJSON(schedulePath, scheduled);
+        newEntries.forEach(entry => setTimer(entry));
+        console.log(`📝 ブログ自動公開 ${newEntries.length}件 をスケジュールしました`);
+    }
+    return newEntries;
+}
+
+// GBP自動投稿スケジュール（邑3回：月曜11:00、水曜11:00、土曜11:00）
+function scheduleGBPAuto() {
+    const now = new Date();
+    const scheduled = readJSON(schedulePath);
+    const gbpDays = [1, 3, 6]; // 月曜, 水曜, 土曜
+    const dayOfWeek = now.getDay();
+    const batchId = Date.now();
+    const newEntries = [];
+
+    const gbpTexts = [
+        'Discover premium hospitality in the heart of Roppongi, Tokyo. Our carefully selected concierge team provides an unforgettable evening experience. Visit tokyoroze.com to learn more.',
+        'Looking for an exceptional night out in Tokyo? Our Roppongi-based luxury concierge service offers personalized experiences for discerning guests. Book at tokyoroze.com',
+        'Weekend in Tokyo? Experience the finest hospitality Roppongi has to offer. Our premium concierge service is available 7 days a week, 5PM-5AM. Details at tokyoroze.com'
+    ];
+
+    for (let i = 0; i < gbpDays.length; i++) {
+        const targetDay = gbpDays[i];
+        let daysUntil = targetDay - dayOfWeek;
+        if (daysUntil < 0) daysUntil += 7;
+        if (daysUntil === 0) {
+            const todayAt11 = new Date(now);
+            todayAt11.setHours(11, 0, 0, 0);
+            if (now >= todayAt11) continue;
+        }
+
+        const targetDate = new Date(now);
+        targetDate.setDate(now.getDate() + daysUntil);
+        const dateStr = targetDate.toISOString().slice(0, 10);
+
+        const alreadyScheduled = scheduled.some(e =>
+            e.platform === 'gbp' &&
+            e.scheduledAt.startsWith(dateStr) &&
+            e.status === 'scheduled'
+        );
+        if (alreadyScheduled) continue;
+
+        const entry = {
+            id: batchId + targetDay + 100,
+            batchId,
+            platform: 'gbp',
+            text: gbpTexts[i],
+            day: ['日曜', '月曜', '火曜', '水曜', '木曜', '金曜', '土曜'][targetDay],
+            scheduledAt: `${dateStr}T11:00:00+09:00`,
+            status: 'scheduled',
+            createdAt: new Date().toISOString()
+        };
+        newEntries.push(entry);
+    }
+
+    if (newEntries.length > 0) {
+        scheduled.push(...newEntries);
+        writeJSON(schedulePath, scheduled);
+        newEntries.forEach(entry => setTimer(entry));
+        console.log(`📍 GBP自動投稿 ${newEntries.length}件 をスケジュールしました`);
+    }
+    return newEntries;
+}
+
+module.exports = { schedule, restore, getScheduled, cancel, executePost, scheduleBlogAuto, scheduleGBPAuto };

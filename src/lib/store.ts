@@ -62,7 +62,7 @@ const defaultData: SiteData = {
         phone: "+81-XX-XXXX-XXXX",
         email: "",
         address: "東京都港区六本木",
-        siteUrl: "https://tokyorendaire.com",
+        siteUrl: "https://tokyoroze.com",
         metaTitle: "TOKYO RENDAIRE — Tokyo Premium Escort",
         metaDescription: "Premium escort service in Tokyo. International guests welcome.",
         nominationFee: 2000,
@@ -82,7 +82,7 @@ const defaultData: SiteData = {
     },
     sns: {
         whatsapp: { enabled: true, accountId: "" },
-        wechat: { enabled: true, accountId: "tokyorendaire" },
+        wechat: { enabled: true, accountId: "tokyoroze" },
         line: { enabled: true, accountId: "" },
         telegram: { enabled: true, accountId: "" },
     },

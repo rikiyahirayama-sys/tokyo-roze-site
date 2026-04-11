@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
             return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
         }
 
-        const siteUrl = process.env.SITE_URL || "https://tokyorendaire.com";
+        const siteUrl = process.env.SITE_URL || "https://tokyoroze.com";
         const date = new Date().toISOString().split("T")[0];
         const html = `<!DOCTYPE html>
 <html lang="en">

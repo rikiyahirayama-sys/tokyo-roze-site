@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <meta name="robots" content="noindex,nofollow">
-    <title>Tokyo Rendaire — 管理画面</title>
+    <title>TOKYO ROZE — 管理画面</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -872,7 +872,7 @@
     <!-- ===== ログイン画面 ===== -->
     <div id="login-screen">
         <div class="login-box">
-            <div class="logo">TOKYO RENDAIRE</div>
+            <div class="logo">TOKYO ROZE</div>
             <div class="sub">管理画面</div>
             <div class="login-err" id="login-err">IDまたはパスワードが正しくありません</div>
             <input type="email" id="login-id" placeholder="メールアドレス" style="margin-bottom:12px"
@@ -886,17 +886,207 @@
     <div id="main-screen">
         <!-- トップバー -->
         <div class="top-bar">
-            <div class="logo">TOKYO RENDAIRE</div>
+            <div class="logo">TOKYO ROZE</div>
             <button class="logout" onclick="doLogout()">ログアウト</button>
         </div>
 
         <!-- タブナビ -->
         <div class="tab-nav">
+            <button onclick="switchTab('dashboard',this)">📊 ダッシュボード</button>
             <button class="active" onclick="switchTab('cast',this)">📋 キャスト管理</button>
             <button onclick="switchTab('sns',this)">📱 SNS投稿</button>
             <button onclick="switchTab('blog',this)">📝 ブログ管理</button>
+            <button onclick="switchTab('job',this)">💼 求人管理</button>
             <button onclick="switchTab('history',this)">📊 投稿履歴</button>
             <button onclick="switchTab('settings',this)">⚙️ 設定</button>
+        </div>
+
+        <!-- ===== タブ0: ダッシュボード ===== -->
+        <div id="tab-dashboard" class="tab-content">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+                <h2 class="section-title" style="margin:0">📊 ダッシュボード</h2>
+                <div style="display:flex;gap:8px">
+                    <select id="dash-period" onchange="loadDashboard()"
+                        style="padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text)">
+                        <option value="7">過去1週間</option>
+                        <option value="30" selected>過去1ヶ月</option>
+                        <option value="90">過去3ヶ月</option>
+                        <option value="365">過去1年</option>
+                        <option value="1825">過去5年</option>
+                        <option value="3650">過去10年</option>
+                    </select>
+                    <button class="btn btn-sm btn-secondary" onclick="loadDashboard()">🔄 更新</button>
+                </div>
+            </div>
+
+            <!-- サマリーカード（今日） -->
+            <div style="margin-bottom:8px;font-size:13px;color:var(--text-muted)">▼ 今日</div>
+            <div
+                style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px">
+                <div class="setting-card" style="text-align:center;margin:0;padding:14px">
+                    <div style="font-size:26px;font-weight:700;color:var(--accent)" id="dash-pv-today">-</div>
+                    <div style="color:var(--text-muted);font-size:12px;margin-top:4px">PV</div>
+                </div>
+                <div class="setting-card" style="text-align:center;margin:0;padding:14px">
+                    <div style="font-size:26px;font-weight:700;color:var(--accent)" id="dash-uu-today">-</div>
+                    <div style="color:var(--text-muted);font-size:12px;margin-top:4px">UU</div>
+                </div>
+                <div class="setting-card" style="text-align:center;margin:0;padding:14px">
+                    <div style="font-size:26px;font-weight:700;color:#25D366" id="dash-cta-today">-</div>
+                    <div style="color:var(--text-muted);font-size:12px;margin-top:4px">CTAクリック</div>
+                </div>
+            </div>
+
+            <!-- サマリーカード（期間合計） -->
+            <div style="margin-bottom:8px;font-size:13px;color:var(--text-muted)" id="dash-period-label">▼ 期間合計</div>
+            <div
+                style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px">
+                <div class="setting-card" style="text-align:center;margin:0;padding:14px">
+                    <div style="font-size:26px;font-weight:700;color:var(--accent)" id="dash-pv-period">-</div>
+                    <div style="color:var(--text-muted);font-size:12px;margin-top:4px">PV合計</div>
+                </div>
+                <div class="setting-card" style="text-align:center;margin:0;padding:14px">
+                    <div style="font-size:26px;font-weight:700;color:var(--accent)" id="dash-uu-period">-</div>
+                    <div style="color:var(--text-muted);font-size:12px;margin-top:4px">UU合計</div>
+                </div>
+                <div class="setting-card" style="text-align:center;margin:0;padding:14px">
+                    <div style="font-size:26px;font-weight:700;color:#25D366" id="dash-cta-total">-</div>
+                    <div style="color:var(--text-muted);font-size:12px;margin-top:4px">CTAクリック合計</div>
+                </div>
+                <div class="setting-card" style="text-align:center;margin:0;padding:14px">
+                    <div style="font-size:26px;font-weight:700;color:#1DA1F2" id="dash-posts-count">-</div>
+                    <div style="color:var(--text-muted);font-size:12px;margin-top:4px">投稿数</div>
+                </div>
+                <div class="setting-card" style="text-align:center;margin:0;padding:14px">
+                    <div style="font-size:26px;font-weight:700;color:#F4511E" id="dash-scheduled">-</div>
+                    <div style="color:var(--text-muted);font-size:12px;margin-top:4px">予約投稿（待機）</div>
+                </div>
+                <div class="setting-card" style="text-align:center;margin:0;padding:14px">
+                    <div style="font-size:26px;font-weight:700;color:#E53935" id="dash-filter">-</div>
+                    <div style="color:var(--text-muted);font-size:12px;margin-top:4px">フィルター発動</div>
+                </div>
+            </div>
+
+            <!-- データ保存範囲 -->
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px" id="dash-data-range"></div>
+
+            <!-- CTA内訳 -->
+            <div class="setting-card">
+                <h3>📱 CTAクリック内訳（期間合計）</h3>
+                <div id="dash-cta-breakdown"
+                    style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:12px">
+                    <div style="color:var(--text-muted)">読み込み中...</div>
+                </div>
+            </div>
+
+            <!-- PVトレンド -->
+            <div class="setting-card">
+                <h3 id="dash-chart-title">📈 PVトレンド</h3>
+                <div id="dash-pv-chart"
+                    style="margin-top:12px;font-family:monospace;font-size:12px;line-height:1.6;overflow-x:auto">
+                    <div style="color:var(--text-muted)">読み込み中...</div>
+                </div>
+            </div>
+
+            <!-- 言語別アクセス -->
+            <div class="setting-card">
+                <h3>🌐 言語別アクセス（期間合計）</h3>
+                <div id="dash-lang"
+                    style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-top:12px">
+                    <div style="color:var(--text-muted)">読み込み中...</div>
+                </div>
+            </div>
+
+            <!-- SNS投稿状況 -->
+            <div class="setting-card">
+                <h3>📱 SNS投稿状況</h3>
+                <div id="dash-sns-stats" style="margin-top:12px">
+                    <div style="color:var(--text-muted)">読み込み中...</div>
+                </div>
+            </div>
+
+            <!-- 最近の投稿 -->
+            <div class="setting-card">
+                <h3>🕐 最近の投稿</h3>
+                <div id="dash-recent-posts" style="margin-top:12px;max-height:300px;overflow-y:auto">
+                    <div style="color:var(--text-muted)">読み込み中...</div>
+                </div>
+            </div>
+
+            <!-- ===== X(Twitter) パフォーマンス ===== -->
+            <div style="margin-top:32px;border-top:2px solid var(--border);padding-top:24px">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                    <h2 class="section-title" style="margin:0">𝕏 X パフォーマンス</h2>
+                    <button class="btn btn-sm btn-secondary" onclick="collectXMetrics()" id="x-collect-btn">📥
+                        指標を収集</button>
+                </div>
+
+                <!-- 凍結バナー -->
+                <div id="x-suspended-banner"
+                    style="display:none;padding:12px;background:#FFF3E0;border:1px solid #FF9800;border-radius:8px;margin-bottom:16px;color:#E65100">
+                    ⚠️ アカウントが凍結中のため、新しい指標は取得できません。保存済みデータを表示しています。
+                </div>
+
+                <!-- アカウント概要 -->
+                <div
+                    style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:16px">
+                    <div class="setting-card" style="margin:0;padding:14px">
+                        <div style="font-weight:600;margin-bottom:8px">🇺🇸 English Account</div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">
+                            <div>
+                                <div style="font-size:22px;font-weight:700;color:#1DA1F2" id="x-en-followers">-</div>
+                                <div style="font-size:11px;color:var(--text-muted)">フォロワー</div>
+                            </div>
+                            <div>
+                                <div style="font-size:22px;font-weight:700;color:var(--accent)" id="x-en-impressions">-
+                                </div>
+                                <div style="font-size:11px;color:var(--text-muted)">インプレッション</div>
+                            </div>
+                            <div>
+                                <div style="font-size:22px;font-weight:700;color:#25D366" id="x-en-engagement">-</div>
+                                <div style="font-size:11px;color:var(--text-muted)">エンゲージ率</div>
+                            </div>
+                        </div>
+                        <div style="font-size:12px;color:var(--text-muted);margin-top:8px" id="x-en-detail"></div>
+                    </div>
+                    <div class="setting-card" style="margin:0;padding:14px">
+                        <div style="font-weight:600;margin-bottom:8px">🇯🇵 Japanese Account</div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">
+                            <div>
+                                <div style="font-size:22px;font-weight:700;color:#1DA1F2" id="x-ja-followers">-</div>
+                                <div style="font-size:11px;color:var(--text-muted)">フォロワー</div>
+                            </div>
+                            <div>
+                                <div style="font-size:22px;font-weight:700;color:var(--accent)" id="x-ja-impressions">-
+                                </div>
+                                <div style="font-size:11px;color:var(--text-muted)">インプレッション</div>
+                            </div>
+                            <div>
+                                <div style="font-size:22px;font-weight:700;color:#25D366" id="x-ja-engagement">-</div>
+                                <div style="font-size:11px;color:var(--text-muted)">エンゲージ率</div>
+                            </div>
+                        </div>
+                        <div style="font-size:12px;color:var(--text-muted);margin-top:8px" id="x-ja-detail"></div>
+                    </div>
+                </div>
+
+                <!-- フォロワー推移チャート -->
+                <div class="setting-card">
+                    <h3 id="x-follower-chart-title">👥 フォロワー推移</h3>
+                    <div id="x-follower-chart"
+                        style="margin-top:12px;font-family:monospace;font-size:12px;line-height:1.6;overflow-x:auto">
+                        <div style="color:var(--text-muted)">データなし</div>
+                    </div>
+                </div>
+
+                <!-- トップツイート -->
+                <div class="setting-card">
+                    <h3>🏆 トップツイート（インプレッション順）</h3>
+                    <div id="x-top-tweets" style="margin-top:12px;max-height:300px;overflow-y:auto">
+                        <div style="color:var(--text-muted)">データなし</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- ===== タブ1: キャスト管理 ===== -->
@@ -949,6 +1139,22 @@
                         <div id="weekly-preview"></div>
                         <div style="margin-top:16px;padding:16px;background:rgba(255,255,255,0.05);border-radius:8px">
                             <div class="form-group" style="margin-bottom:12px">
+                                <label>� 投稿先を選択</label>
+                                <div id="weekly-platform-select"
+                                    style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px">
+                                    <label
+                                        style="display:flex;align-items:center;gap:6px;cursor:pointer;opacity:0.5;text-decoration:line-through">
+                                        <input type="checkbox" value="twitter_en" disabled> X（英語）⚠️凍結中
+                                    </label>
+                                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                                        <input type="checkbox" value="twitter_ja" checked> X（日本語）
+                                    </label>
+                                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                                        <input type="checkbox" value="telegram" checked> Telegram
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin-bottom:12px">
                                 <label>📅 投稿開始日（この日から7日間配信）</label>
                                 <input type="date" id="schedule-start-date"
                                     style="padding:8px 12px;border-radius:6px;border:1px solid var(--border);background:var(--bg-dark);color:var(--text);width:200px">
@@ -957,7 +1163,7 @@
                                 <button class="btn btn-primary" onclick="scheduleWeekly()" id="btn-schedule-weekly">📅
                                     予約投稿する</button>
                                 <button class="btn btn-success" onclick="postAllWeekly()" id="btn-post-all">📤
-                                    今すぐ全部投稿する</button>
+                                    選択したSNSに投稿する</button>
                             </div>
                         </div>
                     </div>
@@ -981,8 +1187,9 @@
                     <div class="form-group">
                         <label>投稿先</label>
                         <div style="display:flex;gap:16px;flex-wrap:wrap">
-                            <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox"
-                                    value="twitter_en" checked> X（英語）</label>
+                            <label
+                                style="display:flex;align-items:center;gap:6px;cursor:pointer;opacity:0.5;text-decoration:line-through"><input
+                                    type="checkbox" value="twitter_en" disabled> X（英語）⚠️凍結中</label>
                             <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox"
                                     value="twitter_ja" checked> X（日本語）</label>
                             <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox"
@@ -1022,6 +1229,79 @@
             </table>
         </div>
 
+        <!-- ===== タブ: 求人管理（Googleしごと検索） ===== -->
+        <div id="tab-job" class="tab-content">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+                <h2 class="section-title" style="margin:0">💼 求人管理（Googleしごと検索）</h2>
+                <div style="display:flex;gap:8px">
+                    <button class="btn btn-primary" onclick="openJobGenerateModal()">🤖 自動生成</button>
+                    <button class="btn btn-secondary" onclick="openJobManualModal()">✏️ 手動編集</button>
+                </div>
+            </div>
+
+            <!-- 現在の掲載内容 -->
+            <div class="card" id="job-current-card">
+                <h3 style="color:var(--accent-light);margin-bottom:12px">📄 現在の掲載内容</h3>
+                <div id="job-current-content" style="color:var(--text-muted)">読み込み中...</div>
+            </div>
+
+            <!-- 求人アナリティクス -->
+            <div class="card" style="margin-top:20px">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                    <h3 style="color:var(--accent-light);margin:0">📊 求人アナリティクス</h3>
+                    <select id="job-dash-period" onchange="loadJobDashboard()" style="padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);color:var(--text)">
+                        <option value="7">1週間</option>
+                        <option value="30" selected>1ヶ月</option>
+                        <option value="90">3ヶ月</option>
+                        <option value="365">1年</option>
+                        <option value="1825">5年</option>
+                        <option value="3650">10年</option>
+                    </select>
+                </div>
+
+                <!-- サマリーカード -->
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px">
+                    <div class="setting-card" style="margin:0;padding:14px;text-align:center">
+                        <div style="font-size:11px;color:var(--text-muted)">今日の閲覧</div>
+                        <div style="font-size:28px;font-weight:700;color:#1DA1F2" id="job-views-today">-</div>
+                    </div>
+                    <div class="setting-card" style="margin:0;padding:14px;text-align:center">
+                        <div style="font-size:11px;color:var(--text-muted)">今日の問い合わせ</div>
+                        <div style="font-size:28px;font-weight:700;color:#25D366" id="job-inquiries-today">-</div>
+                    </div>
+                    <div class="setting-card" style="margin:0;padding:14px;text-align:center">
+                        <div style="font-size:11px;color:var(--text-muted)">期間合計 閲覧</div>
+                        <div style="font-size:28px;font-weight:700;color:var(--accent)" id="job-views-period">-</div>
+                    </div>
+                    <div class="setting-card" style="margin:0;padding:14px;text-align:center">
+                        <div style="font-size:11px;color:var(--text-muted)">期間合計 問い合わせ</div>
+                        <div style="font-size:28px;font-weight:700;color:#E53935" id="job-inquiries-period">-</div>
+                    </div>
+                    <div class="setting-card" style="margin:0;padding:14px;text-align:center">
+                        <div style="font-size:11px;color:var(--text-muted)">CVR（問合せ/閲覧）</div>
+                        <div style="font-size:28px;font-weight:700;color:#FF9800" id="job-cvr">-</div>
+                    </div>
+                </div>
+
+                <!-- データ範囲 -->
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px" id="job-data-range"></div>
+
+                <!-- 問い合わせ内訳 -->
+                <div class="setting-card" id="job-inquiry-breakdown-card" style="display:none">
+                    <h3>📱 問い合わせ経路（期間合計）</h3>
+                    <div id="job-inquiry-breakdown" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:12px"></div>
+                </div>
+
+                <!-- トレンドチャート -->
+                <div class="setting-card">
+                    <h3 id="job-chart-title">📈 求人閲覧・問い合わせ推移</h3>
+                    <div id="job-trend-chart" style="margin-top:12px;font-family:monospace;font-size:12px;line-height:1.6;overflow-x:auto">
+                        <div style="color:var(--text-muted)">読み込み中...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- ===== タブ4: 投稿履歴 ===== -->
         <div id="tab-history" class="tab-content">
             <h2 class="section-title">投稿履歴</h2>
@@ -1031,9 +1311,12 @@
                 <h3 style="color:var(--accent-light);margin-bottom:12px">📅 予約投稿スケジュール</h3>
                 <div class="filter-bar" style="margin-bottom:12px">
                     <button class="filter-btn active" onclick="filterScheduled('all',this)">全部</button>
-                    <button class="filter-btn" onclick="filterScheduled('twitter_en',this)">X英語</button>
-                    <button class="filter-btn" onclick="filterScheduled('twitter_ja',this)">X日本語</button>
+                    <button class="filter-btn" onclick="filterScheduled('telegram_en',this)">TG英語</button>
+                    <button class="filter-btn" onclick="filterScheduled('telegram_ja',this)">TG日本語</button>
                     <button class="filter-btn" onclick="filterScheduled('telegram',this)">Telegram</button>
+                    <button class="filter-btn" onclick="filterScheduled('reddit',this)">Reddit</button>
+                    <button class="filter-btn" onclick="filterScheduled('gbp',this)">GBP</button>
+                    <button class="filter-btn" onclick="filterScheduled('blog_auto',this)">ブログ</button>
                 </div>
                 <table class="data-table">
                     <thead>
@@ -1172,7 +1455,7 @@
             <div class="setting-card">
                 <h3>🌐 サイト設定</h3>
                 <div class="setting-row"><label>サイトURL</label><input type="text" data-key="SITE_URL"
-                        placeholder="https://tokyorendaire.com"></div>
+                        placeholder="https://tokyoroze.com"></div>
                 <button class="btn btn-sm btn-primary" style="margin-top:8px" onclick="saveSettings('site')">保存</button>
             </div>
 
@@ -1193,7 +1476,7 @@
 
     <script>
         // ============================================
-        // Tokyo Rendaire 管理画面 JavaScript
+        // TOKYO ROZE 管理画面 JavaScript
         // ============================================
 
         const API = '';
@@ -1312,9 +1595,11 @@
             document.querySelectorAll('.tab-nav button').forEach(b => b.classList.remove('active'));
             document.getElementById('tab-' + name).classList.add('active');
             btn.classList.add('active');
+            if (name === 'dashboard') loadDashboard();
             if (name === 'cast') loadCasts();
             if (name === 'history') loadHistory();
             if (name === 'blog') loadBlogList();
+            if (name === 'job') loadJobPosting();
             if (name === 'settings') loadSettings();
         }
 
@@ -1518,20 +1803,21 @@
         }
 
         function collectWeeklyPosts() {
+            const selectedPlatforms = getSelectedWeeklyPlatforms();
             const posts = { twitter_en: [], twitter_ja: [], telegram: [] };
-            if (weeklyPostsData.twitter_en) {
+            if (selectedPlatforms.includes('twitter_en') && weeklyPostsData.twitter_en) {
                 weeklyPostsData.twitter_en.forEach((p, i) => {
                     const el = document.getElementById('wp-en-' + i);
                     if (el) posts.twitter_en.push({ text: el.value, day: p.day, time: p.time });
                 });
             }
-            if (weeklyPostsData.twitter_ja) {
+            if (selectedPlatforms.includes('twitter_ja') && weeklyPostsData.twitter_ja) {
                 weeklyPostsData.twitter_ja.forEach((p, i) => {
                     const el = document.getElementById('wp-ja-' + i);
                     if (el) posts.twitter_ja.push({ text: el.value, day: p.day, time: p.time, type: p.type || 'recruit' });
                 });
             }
-            if (weeklyPostsData.telegram) {
+            if (selectedPlatforms.includes('telegram') && weeklyPostsData.telegram) {
                 weeklyPostsData.telegram.forEach((p, i) => {
                     const el = document.getElementById('wp-tg-' + i);
                     if (el) posts.telegram.push({ text: el.value, day: p.day, time: p.time });
@@ -1540,11 +1826,19 @@
             return posts;
         }
 
+        function getSelectedWeeklyPlatforms() {
+            const checkboxes = document.querySelectorAll('#weekly-platform-select input[type=checkbox]');
+            return Array.from(checkboxes).filter(c => c.checked).map(c => c.value);
+        }
+
         async function scheduleWeekly() {
             if (!weeklyPostsData) return;
             const startDate = document.getElementById('schedule-start-date').value;
             if (!startDate) { toast('投稿開始日を選択してください', 'warning'); return; }
-            if (!confirm2(`${startDate} から7日間の予約投稿を登録しますか？`)) return;
+            const selectedPlatforms = getSelectedWeeklyPlatforms();
+            if (selectedPlatforms.length === 0) { toast('投稿先を少なくとも1つ選択してください', 'warning'); return; }
+            const platformNames = selectedPlatforms.map(p => p === 'twitter_ja' ? 'X日本語' : p === 'twitter_en' ? 'X英語' : 'Telegram').join(', ');
+            if (!confirm2(`${startDate} から7日間、${platformNames} に予約投稿を登録しますか？`)) return;
 
             const btn = document.getElementById('btn-schedule-weekly');
             btn.disabled = true;
@@ -1564,7 +1858,11 @@
         }
 
         async function postAllWeekly() {
-            if (!weeklyPostsData || !confirm2('全投稿を今すぐSNSに送信しますか？')) return;
+            if (!weeklyPostsData) return;
+            const selectedPlatforms = getSelectedWeeklyPlatforms();
+            if (selectedPlatforms.length === 0) { toast('投稿先を少なくとも1つ選択してください', 'warning'); return; }
+            const platformNames = selectedPlatforms.map(p => p === 'twitter_ja' ? 'X日本語' : p === 'twitter_en' ? 'X英語' : 'Telegram').join(', ');
+            if (!confirm2(`${platformNames} に投稿しますか？`)) return;
 
             const btn = document.getElementById('btn-post-all');
             btn.disabled = true;
@@ -1583,7 +1881,7 @@
             showBanner('⏳ ' + total + '件の投稿を送信中... 他のタブで作業しても大丈夫です', 'processing');
             const res = await api('/api/sns/post', { method: 'POST', body: JSON.stringify({ posts: postData }) });
             btn.disabled = false;
-            btn.innerHTML = '📤 今すぐ全部投稿する';
+            btn.innerHTML = '📤 選択したSNSに投稿する';
             if (res.success) {
                 const ok = (res.results || []).filter(r => r.success).length;
                 const ng = (res.results || []).filter(r => !r.success).length;
@@ -1746,9 +2044,17 @@
             const container = document.getElementById('tpl-preview-cards');
             container.innerHTML = '';
 
-            if (res.posts.twitter_en) container.innerHTML += `<div class="preview-card"><div class="platform">X（英語）</div><textarea id="tpl-en">${escHtml(res.posts.twitter_en)}</textarea><div class="char-count">${res.posts.twitter_en.length}/280</div></div>`;
+            if (res.posts.twitter_en) container.innerHTML += `<div class="preview-card"><div class="platform">X（英語）⚠️凍結中</div><textarea id="tpl-en">${escHtml(res.posts.twitter_en)}</textarea><div class="char-count">${res.posts.twitter_en.length}/280</div></div>`;
             if (res.posts.twitter_ja) container.innerHTML += `<div class="preview-card"><div class="platform">X（日本語）</div><textarea id="tpl-ja">${escHtml(res.posts.twitter_ja)}</textarea><div class="char-count">${res.posts.twitter_ja.length}/280</div></div>`;
             if (res.posts.telegram) container.innerHTML += `<div class="preview-card"><div class="platform">Telegram</div><textarea id="tpl-tg" style="min-height:140px">${escHtml(res.posts.telegram)}</textarea></div>`;
+
+            // 投稿先選択チェックボックス
+            container.innerHTML += `<div id="tpl-platform-select" style="margin-top:12px;display:flex;gap:16px;flex-wrap:wrap">
+                <label style="font-weight:bold;width:100%">📤 投稿先を選択:</label>
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;opacity:0.5;text-decoration:line-through"><input type="checkbox" value="twitter_en" disabled> X（英語）⚠️凍結中</label>
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" value="twitter_ja" checked> X（日本語）</label>
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" value="telegram" checked> Telegram</label>
+            </div>`;
 
             document.getElementById('tpl-preview').style.display = 'block';
             document.getElementById('btn-tpl-post').style.display = 'inline-flex';
@@ -1756,11 +2062,15 @@
         }
 
         async function postTemplate() {
-            if (!confirm2('全SNSに投稿しますか？')) return;
+            const tplCheckboxes = document.querySelectorAll('#tpl-platform-select input[type=checkbox]');
+            const selectedPlatforms = Array.from(tplCheckboxes).filter(c => c.checked).map(c => c.value);
+            if (selectedPlatforms.length === 0) { toast('投稿先を少なくとも1つ選択してください', 'warning'); return; }
+            const platformNames = selectedPlatforms.map(p => p === 'twitter_ja' ? 'X日本語' : p === 'twitter_en' ? 'X英語' : 'Telegram').join(', ');
+            if (!confirm2(`${platformNames} に投稿しますか？`)) return;
             const posts = {
-                twitter_en: [document.getElementById('tpl-en')?.value].filter(Boolean),
-                twitter_ja: [document.getElementById('tpl-ja')?.value].filter(Boolean),
-                telegram: [document.getElementById('tpl-tg')?.value].filter(Boolean),
+                twitter_en: selectedPlatforms.includes('twitter_en') ? [document.getElementById('tpl-en')?.value].filter(Boolean) : [],
+                twitter_ja: selectedPlatforms.includes('twitter_ja') ? [document.getElementById('tpl-ja')?.value].filter(Boolean) : [],
+                telegram: selectedPlatforms.includes('telegram') ? [document.getElementById('tpl-tg')?.value].filter(Boolean) : [],
             };
             toast('投稿中...', 'warning');
             const res = await api('/api/sns/post', { method: 'POST', body: JSON.stringify({ posts }) });
@@ -1861,6 +2171,261 @@
             const res = await api('/api/blog/' + slug, { method: 'DELETE' });
             if (res.success) { toast('削除しました'); loadBlogList(); }
             else toast('エラー: ' + (res.error || ''), 'error');
+        }
+
+        // ===== 求人管理（Googleしごと検索） =====
+        let jobPostingData = null;
+
+        async function loadJobPosting() {
+            const res = await api('/api/job-posting/current');
+            const container = document.getElementById('job-current-content');
+            if (!res.success || !res.jobPosting) {
+                container.innerHTML = '<p style="color:var(--text-muted)">現在、求人は掲載されていません。「自動生成」または「手動編集」で作成してください。</p>';
+                return;
+            }
+            const jp = res.jobPosting;
+            container.innerHTML = `
+                <div style="display:grid;gap:12px">
+                    <div><strong style="color:var(--accent)">タイトル:</strong> ${escHtml(jp.title)}</div>
+                    <div><strong style="color:var(--accent)">説明:</strong><p style="margin:4px 0;white-space:pre-wrap">${escHtml(jp.description)}</p></div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                        <div><strong style="color:var(--accent)">掲載開始:</strong> ${jp.datePosted || '-'}</div>
+                        <div><strong style="color:var(--accent)">掲載終了:</strong> ${jp.validThrough || '-'}</div>
+                        <div><strong style="color:var(--accent)">給与:</strong> ¥${(jp.minSalary || 0).toLocaleString()} 〜 ¥${(jp.maxSalary || 0).toLocaleString()} / ${jp.salaryUnit === 'DAY' ? '日' : jp.salaryUnit}</div>
+                        <div><strong style="color:var(--accent)">雇用形態:</strong> ${jp.employmentType || '-'}</div>
+                    </div>
+                    <div><strong style="color:var(--accent)">応募資格:</strong> ${escHtml(jp.qualifications || '')}</div>
+                    <div><strong style="color:var(--accent)">待遇:</strong> ${escHtml(jp.jobBenefits || '')}</div>
+                    <div><strong style="color:var(--accent)">勤務時間:</strong> ${escHtml(jp.workHours || '')}</div>
+                    <div style="font-size:12px;color:var(--text-muted)">公開日時: ${jp.publishedAt ? new Date(jp.publishedAt).toLocaleString('ja-JP') : '-'}</div>
+                    <div style="display:flex;gap:8px;margin-top:8px">
+                        <button class="btn btn-secondary" onclick="openJobManualModal()">✏️ 編集</button>
+                        <button class="btn" style="background:#a03030;color:#fff" onclick="deleteJobPosting()">🗑️ 掲載を削除</button>
+                    </div>
+                </div>
+            `;
+            // 求人アナリティクスも読み込む
+            loadJobDashboard();
+        }
+
+        function escHtml(s) { return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+        function openJobGenerateModal() {
+            showModal(`
+    <h2>🤖 求人内容 自動生成</h2>
+    <div class="form-group"><label>ポイント・要望（空欄なら自動提案）</label><textarea id="job-hints" style="min-height:60px" placeholder="例: 未経験者歓迎を強調、報酬の高さをアピール"></textarea></div>
+    <div id="job-gen-preview" style="display:none">
+      <div class="form-group"><label>タイトル</label><input id="jp-title"></div>
+      <div class="form-group"><label>説明文</label><textarea id="jp-desc" style="min-height:120px"></textarea></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group"><label>掲載開始日</label><input id="jp-datePosted" type="date"></div>
+        <div class="form-group"><label>掲載終了日</label><input id="jp-validThrough" type="date"></div>
+        <div class="form-group"><label>最低給与 (円/日)</label><input id="jp-minSalary" type="number"></div>
+        <div class="form-group"><label>最高給与 (円/日)</label><input id="jp-maxSalary" type="number"></div>
+      </div>
+      <div class="form-group"><label>応募資格</label><input id="jp-qualifications"></div>
+      <div class="form-group"><label>待遇・福利厚生</label><textarea id="jp-benefits" style="min-height:60px"></textarea></div>
+      <div class="form-group"><label>勤務時間</label><input id="jp-workHours"></div>
+    </div>
+    <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:20px">
+      <button class="btn btn-secondary" onclick="closeModal()">キャンセル</button>
+      <button class="btn btn-primary" id="btn-job-gen" onclick="generateJobPosting()">🤖 生成</button>
+      <button class="btn btn-success" id="btn-job-pub" style="display:none" onclick="publishJobPosting()">🌐 掲載する</button>
+    </div>
+  `);
+        }
+
+        async function generateJobPosting() {
+            const btn = document.getElementById('btn-job-gen');
+            setLoading(btn, true);
+            const hints = document.getElementById('job-hints').value;
+            const res = await api('/api/job-posting/generate', { method: 'POST', body: JSON.stringify({ hints }) });
+            setLoading(btn, false);
+
+            if (!res.success) { toast(res.error || '⚠️ APIキーが未設定です', 'error'); return; }
+
+            jobPostingData = res.jobPosting;
+            fillJobForm(res.jobPosting);
+            document.getElementById('job-gen-preview').style.display = 'block';
+            document.getElementById('btn-job-pub').style.display = 'inline-flex';
+            toast('求人内容を生成しました。確認・編集後「掲載する」を押してください');
+        }
+
+        function fillJobForm(jp) {
+            document.getElementById('jp-title').value = jp.title || '';
+            document.getElementById('jp-desc').value = jp.description || '';
+            document.getElementById('jp-datePosted').value = jp.datePosted || '';
+            document.getElementById('jp-validThrough').value = jp.validThrough || '';
+            document.getElementById('jp-minSalary').value = jp.minSalary || 30000;
+            document.getElementById('jp-maxSalary').value = jp.maxSalary || 100000;
+            document.getElementById('jp-qualifications').value = jp.qualifications || '';
+            document.getElementById('jp-benefits').value = jp.jobBenefits || '';
+            document.getElementById('jp-workHours').value = jp.workHours || '';
+        }
+
+        function readJobForm() {
+            return {
+                title: document.getElementById('jp-title').value,
+                description: document.getElementById('jp-desc').value,
+                datePosted: document.getElementById('jp-datePosted').value,
+                validThrough: document.getElementById('jp-validThrough').value,
+                employmentType: 'PART_TIME',
+                minSalary: parseInt(document.getElementById('jp-minSalary').value) || 30000,
+                maxSalary: parseInt(document.getElementById('jp-maxSalary').value) || 100000,
+                salaryUnit: 'DAY',
+                qualifications: document.getElementById('jp-qualifications').value,
+                jobBenefits: document.getElementById('jp-benefits').value,
+                workHours: document.getElementById('jp-workHours').value
+            };
+        }
+
+        async function publishJobPosting() {
+            const data = readJobForm();
+            if (!data.title || !data.description) { toast('タイトルと説明は必須です', 'warning'); return; }
+            if (!confirm2('この内容で求人を掲載しますか？')) return;
+            const res = await api('/api/job-posting/publish', { method: 'POST', body: JSON.stringify(data) });
+            if (res.success) {
+                toast('✅ 求人を掲載しました！ ' + (res.message || ''));
+                closeModal();
+                loadJobPosting();
+            } else {
+                toast('エラー: ' + (res.error || ''), 'error');
+            }
+        }
+
+        function openJobManualModal() {
+            showModal(`
+    <h2>✏️ 求人内容 手動編集</h2>
+    <div id="job-gen-preview">
+      <div class="form-group"><label>タイトル</label><input id="jp-title"></div>
+      <div class="form-group"><label>説明文</label><textarea id="jp-desc" style="min-height:120px"></textarea></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group"><label>掲載開始日</label><input id="jp-datePosted" type="date"></div>
+        <div class="form-group"><label>掲載終了日</label><input id="jp-validThrough" type="date"></div>
+        <div class="form-group"><label>最低給与 (円/日)</label><input id="jp-minSalary" type="number"></div>
+        <div class="form-group"><label>最高給与 (円/日)</label><input id="jp-maxSalary" type="number"></div>
+      </div>
+      <div class="form-group"><label>応募資格</label><input id="jp-qualifications"></div>
+      <div class="form-group"><label>待遇・福利厚生</label><textarea id="jp-benefits" style="min-height:60px"></textarea></div>
+      <div class="form-group"><label>勤務時間</label><input id="jp-workHours"></div>
+    </div>
+    <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:20px">
+      <button class="btn btn-secondary" onclick="closeModal()">キャンセル</button>
+      <button class="btn btn-success" id="btn-job-pub" onclick="publishJobPosting()">🌐 掲載する</button>
+    </div>
+  `);
+            // 現在の内容をロード
+            api('/api/job-posting/current').then(res => {
+                if (res.success && res.jobPosting) {
+                    fillJobForm(res.jobPosting);
+                } else {
+                    // デフォルト値をセット
+                    const today = new Date().toISOString().split('T')[0];
+                    const future = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+                    document.getElementById('jp-datePosted').value = today;
+                    document.getElementById('jp-validThrough').value = future;
+                    document.getElementById('jp-minSalary').value = 30000;
+                    document.getElementById('jp-maxSalary').value = 100000;
+                }
+            });
+        }
+
+        async function deleteJobPosting() {
+            if (!confirm2('求人の掲載を削除しますか？HTMLからも除去されます。')) return;
+            const res = await api('/api/job-posting', { method: 'DELETE' });
+            if (res.success) { toast('掲載を削除しました'); loadJobPosting(); }
+            else toast('エラー: ' + (res.error || ''), 'error');
+        }
+
+        // ===== 求人アナリティクス =====
+        async function loadJobDashboard() {
+            const days = document.getElementById('job-dash-period').value || 30;
+            try {
+                const res = await api('/api/analytics/job-dashboard?days=' + days);
+                if (!res.success) return;
+                renderJobDashboard(res);
+            } catch (e) {
+                console.error('[Job Dashboard]', e);
+            }
+        }
+
+        function renderJobDashboard(d) {
+            // サマリー
+            document.getElementById('job-views-today').textContent = (d.today.views || 0).toLocaleString();
+            document.getElementById('job-inquiries-today').textContent = (d.today.inquiries || 0).toLocaleString();
+            document.getElementById('job-views-period').textContent = (d.period.views || 0).toLocaleString();
+            document.getElementById('job-inquiries-period').textContent = (d.period.inquiries || 0).toLocaleString();
+            document.getElementById('job-cvr').textContent = (d.period.cvr || 0) + '%';
+
+            // データ範囲
+            const rangeEl = document.getElementById('job-data-range');
+            if (d.dataRange && d.dataRange.from) {
+                rangeEl.textContent = '📅 データ範囲: ' + d.dataRange.from + ' 〜 ' + d.dataRange.to + '（' + d.dataRange.totalDays + '日分）';
+            } else {
+                rangeEl.textContent = '📅 データなし';
+            }
+
+            // 問い合わせ内訳
+            const inquiryBy = d.period.inquiryBy || {};
+            const breakdownCard = document.getElementById('job-inquiry-breakdown-card');
+            const breakdownEl = document.getElementById('job-inquiry-breakdown');
+            const byKeys = Object.keys(inquiryBy);
+            if (byKeys.length > 0) {
+                breakdownCard.style.display = '';
+                const labelMap = { recruit_cta: '求人CTA', whatsapp: 'WhatsApp', line: 'LINE', telegram: 'Telegram', wechat: 'WeChat', phone: '電話' };
+                breakdownEl.innerHTML = byKeys.map(k =>
+                    '<div style="background:var(--bg);padding:10px;border-radius:8px;text-align:center">' +
+                    '<div style="font-size:20px;font-weight:700;color:var(--accent)">' + (inquiryBy[k] || 0) + '</div>' +
+                    '<div style="font-size:12px;color:var(--text-muted);margin-top:4px">' + (labelMap[k] || k) + '</div></div>'
+                ).join('');
+            } else {
+                breakdownCard.style.display = 'none';
+            }
+
+            // チャートタイトル
+            const aggLabel = { daily: '日別', monthly: '月別', yearly: '年別' };
+            document.getElementById('job-chart-title').textContent = '📈 求人閲覧・問い合わせ推移（' + (aggLabel[d.period.aggregation] || '日別') + '）';
+
+            // トレンドチャート（テキストバーチャート）
+            const trend = d.trend || [];
+            const chartEl = document.getElementById('job-trend-chart');
+            if (trend.length === 0) {
+                chartEl.innerHTML = '<div style="color:var(--text-muted)">データなし</div>';
+                return;
+            }
+
+            const maxVal = Math.max(...trend.map(t => Math.max(t.views || 0, t.inquiries || 0)), 1);
+            const barWidth = 30;
+
+            // 表示件数制限 (日別:最大90, 月別:最大60, 年別:全部)
+            const maxItems = d.period.aggregation === 'yearly' ? trend.length : d.period.aggregation === 'monthly' ? 60 : 90;
+            const display = trend.slice(-maxItems);
+
+            let html = '<div style="display:grid;grid-template-columns:80px 50px 50px 1fr;gap:4px 8px;align-items:center">';
+            html += '<div style="font-weight:600;font-size:11px;color:var(--text-muted)">日付</div>';
+            html += '<div style="font-weight:600;font-size:11px;color:var(--text-muted);text-align:right">閲覧</div>';
+            html += '<div style="font-weight:600;font-size:11px;color:var(--text-muted);text-align:right">問合せ</div>';
+            html += '<div style="font-weight:600;font-size:11px;color:var(--text-muted)">グラフ</div>';
+
+            display.forEach(function (t) {
+                var viewBar = Math.round((t.views || 0) / maxVal * barWidth);
+                var inqBar = Math.round((t.inquiries || 0) / maxVal * barWidth);
+                var dateLabel = t.date;
+                // 日別は月日のみ表示
+                if (d.period.aggregation === 'daily' && t.date.length === 10) {
+                    dateLabel = t.date.slice(5);
+                }
+                html += '<div style="color:var(--text-muted);font-size:11px">' + dateLabel + '</div>';
+                html += '<div style="text-align:right;color:#1DA1F2">' + (t.views || 0) + '</div>';
+                html += '<div style="text-align:right;color:#25D366">' + (t.inquiries || 0) + '</div>';
+                html += '<div>';
+                html += '<span style="color:#1DA1F2">' + '█'.repeat(viewBar) + '</span>';
+                if (inqBar > 0) html += ' <span style="color:#25D366">' + '█'.repeat(inqBar) + '</span>';
+                html += '</div>';
+            });
+            html += '</div>';
+            html += '<div style="margin-top:8px;font-size:11px;color:var(--text-muted)"><span style="color:#1DA1F2">█</span> 閲覧　<span style="color:#25D366">█</span> 問い合わせ</div>';
+            chartEl.innerHTML = html;
         }
 
         // ===== 投稿履歴 =====
@@ -2045,6 +2610,262 @@
                     else previewManualPhotos(e.dataTransfer.files);
                 }
             });
+        }
+
+        // ===== ダッシュボード =====
+        async function loadDashboard() {
+            const days = document.getElementById('dash-period').value || 30;
+            try {
+                const res = await api('/api/analytics/dashboard?days=' + days);
+                if (!res.success) { toast('データ取得失敗', 'error'); return; }
+                renderDashboard(res);
+            } catch (e) {
+                console.error('[Dashboard]', e);
+                document.getElementById('dash-pv-today').textContent = '—';
+            }
+            // X指標も同じ期間で取得
+            loadXDashboard(days);
+        }
+
+        async function loadXDashboard(days) {
+            try {
+                const res = await api('/api/analytics/x-dashboard?days=' + (days || 30));
+                if (!res.success) return;
+                renderXDashboard(res);
+            } catch (e) {
+                console.error('[X Dashboard]', e);
+            }
+        }
+
+        async function collectXMetrics() {
+            const btn = document.getElementById('x-collect-btn');
+            btn.disabled = true;
+            btn.textContent = '⏳ 収集中...';
+            try {
+                const res = await api('/api/analytics/collect-x', { method: 'POST' });
+                if (res.success) {
+                    toast('X指標収集完了（' + (res.collected || 0) + '件）', 'success');
+                    const days = document.getElementById('dash-period').value || 30;
+                    loadXDashboard(days);
+                } else {
+                    toast('X指標収集失敗', 'error');
+                }
+            } catch (e) {
+                toast('X指標収集エラー: ' + e.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '📥 指標を収集';
+            }
+        }
+
+        function renderXDashboard(d) {
+            // 凍結バナー
+            const banner = document.getElementById('x-suspended-banner');
+            if (d.suspended) { banner.style.display = 'block'; } else { banner.style.display = 'none'; }
+
+            const periodNames = { 7: '1週間', 30: '1ヶ月', 90: '3ヶ月', 365: '1年', 1825: '5年', 3650: '10年' };
+            const periodDays = d.period ? d.period.days : 30;
+            const isMonthly = d.period && d.period.useMonthly;
+
+            // ENアカウント
+            const enAcc = d.accounts && d.accounts.en;
+            const enTotals = d.totals && d.totals.en || {};
+            document.getElementById('x-en-followers').textContent = enAcc ? (enAcc.followers || 0).toLocaleString() : '-';
+            document.getElementById('x-en-impressions').textContent = (enTotals.impressions || 0).toLocaleString();
+            document.getElementById('x-en-engagement').textContent = (enTotals.engagementRate || 0) + '%';
+            document.getElementById('x-en-detail').textContent = enAcc
+                ? '投稿数: ' + (enTotals.posts || 0) + ' / ❤️ ' + (enTotals.likes || 0) + ' / 🔄 ' + (enTotals.retweets || 0) + ' / 💬 ' + (enTotals.replies || 0)
+                : 'アカウントデータなし';
+
+            // JAアカウント
+            const jaAcc = d.accounts && d.accounts.ja;
+            const jaTotals = d.totals && d.totals.ja || {};
+            document.getElementById('x-ja-followers').textContent = jaAcc ? (jaAcc.followers || 0).toLocaleString() : '-';
+            document.getElementById('x-ja-impressions').textContent = (jaTotals.impressions || 0).toLocaleString();
+            document.getElementById('x-ja-engagement').textContent = (jaTotals.engagementRate || 0) + '%';
+            document.getElementById('x-ja-detail').textContent = jaAcc
+                ? '投稿数: ' + (jaTotals.posts || 0) + ' / ❤️ ' + (jaTotals.likes || 0) + ' / 🔄 ' + (jaTotals.retweets || 0) + ' / 💬 ' + (jaTotals.replies || 0)
+                : 'アカウントデータなし';
+
+            // フォロワー推移
+            const trend = d.followerTrend || [];
+            document.getElementById('x-follower-chart-title').textContent = isMonthly ? '👥 フォロワー推移（月別）' : '👥 フォロワー推移（日別）';
+
+            if (trend.length > 0) {
+                const maxF = Math.max(...trend.map(t => Math.max((t.en && t.en.followers) || 0, (t.ja && t.ja.followers) || 0)), 1);
+                const maxBars = isMonthly ? 60 : 30;
+                const displayTrend = trend.slice(-maxBars);
+                let chartHtml = '<div style="display:grid;grid-template-columns:80px 60px 60px 1fr;gap:4px 8px;align-items:center">';
+                chartHtml += '<div style="font-weight:600;font-size:11px;color:var(--text-muted)">日付</div>';
+                chartHtml += '<div style="font-weight:600;font-size:11px;color:var(--text-muted);text-align:right">EN</div>';
+                chartHtml += '<div style="font-weight:600;font-size:11px;color:var(--text-muted);text-align:right">JA</div>';
+                chartHtml += '<div></div>';
+                for (const t of displayTrend) {
+                    const enF = (t.en && t.en.followers) || 0;
+                    const jaF = (t.ja && t.ja.followers) || 0;
+                    const barW = Math.max(1, Math.round((Math.max(enF, jaF) / maxF) * 100));
+                    const dateLabel = isMonthly ? t.date : t.date.slice(5);
+                    chartHtml += '<div style="color:var(--text-muted)">' + dateLabel + '</div>';
+                    chartHtml += '<div style="text-align:right;color:#1DA1F2;font-weight:600">' + enF.toLocaleString() + '</div>';
+                    chartHtml += '<div style="text-align:right;color:#E53935;font-weight:600">' + jaF.toLocaleString() + '</div>';
+                    chartHtml += '<div style="display:flex;gap:2px;height:14px">';
+                    chartHtml += '<div style="background:#1DA1F2;width:' + Math.max(1, Math.round((enF / maxF) * 100)) + '%;border-radius:2px;opacity:0.7"></div>';
+                    chartHtml += '<div style="background:#E53935;width:' + Math.max(1, Math.round((jaF / maxF) * 100)) + '%;border-radius:2px;opacity:0.7"></div>';
+                    chartHtml += '</div>';
+                }
+                chartHtml += '</div>';
+                if (isMonthly) chartHtml += '<div style="font-size:11px;color:var(--text-muted);margin-top:8px">※ 月別集計表示</div>';
+                document.getElementById('x-follower-chart').innerHTML = chartHtml;
+            } else {
+                document.getElementById('x-follower-chart').innerHTML = '<div style="color:var(--text-muted)">フォロワー推移データがありません。「指標を収集」ボタンで取得してください。</div>';
+            }
+
+            // トップツイート
+            const topTweets = d.topTweets || [];
+            if (topTweets.length > 0) {
+                let twHtml = '';
+                for (const tw of topTweets) {
+                    const plat = tw.platform === 'twitter_ja' ? '🇯🇵' : '🇺🇸';
+                    const date = tw.createdAt ? new Date(tw.createdAt).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' }) : '';
+                    twHtml += '<div style="padding:10px 0;border-bottom:1px solid var(--border)">';
+                    twHtml += '<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">';
+                    twHtml += '<span>' + plat + '</span>';
+                    twHtml += '<span style="color:var(--text-muted);font-size:12px">' + date + '</span>';
+                    twHtml += '<span style="font-size:13px;flex:1">' + escHtml(tw.text || '') + '</span>';
+                    twHtml += '</div>';
+                    twHtml += '<div style="display:flex;gap:16px;margin-top:6px;font-size:12px;color:var(--text-muted)">';
+                    twHtml += '<span>👁 ' + (tw.impressions || 0).toLocaleString() + '</span>';
+                    twHtml += '<span>❤️ ' + (tw.likes || 0).toLocaleString() + '</span>';
+                    twHtml += '<span>🔄 ' + (tw.retweets || 0).toLocaleString() + '</span>';
+                    twHtml += '<span>💬 ' + (tw.replies || 0).toLocaleString() + '</span>';
+                    twHtml += '<span>🔖 ' + (tw.bookmarks || 0).toLocaleString() + '</span>';
+                    twHtml += '</div></div>';
+                }
+                document.getElementById('x-top-tweets').innerHTML = twHtml;
+            } else {
+                document.getElementById('x-top-tweets').innerHTML = '<div style="color:var(--text-muted)">ツイートデータなし</div>';
+            }
+        }
+
+        function renderDashboard(d) {
+            const periodNames = { 7: '1週間', 30: '1ヶ月', 90: '3ヶ月', 365: '1年', 1825: '5年', 3650: '10年' };
+            const periodDays = d.period ? d.period.days : 30;
+            const periodName = periodNames[periodDays] || periodDays + '日';
+            const isMonthly = d.period && d.period.useMonthly;
+
+            // 今日のサマリー
+            document.getElementById('dash-pv-today').textContent = (d.today.pv || 0).toLocaleString();
+            document.getElementById('dash-uu-today').textContent = (d.today.uu || 0).toLocaleString();
+            const todayCta = d.today.cta || {};
+            const todayCtaTotal = Object.values(todayCta).reduce((s, v) => s + v, 0);
+            document.getElementById('dash-cta-today').textContent = todayCtaTotal.toLocaleString();
+
+            // 期間合計
+            document.getElementById('dash-period-label').textContent = '▼ 期間合計（過去' + periodName + '）';
+            document.getElementById('dash-pv-period').textContent = (d.period ? d.period.pv : 0).toLocaleString();
+            document.getElementById('dash-uu-period').textContent = (d.period ? d.period.uu : 0).toLocaleString();
+            const periodCtaTotal = Object.values((d.period ? d.period.cta : {}) || {}).reduce((s, v) => s + v, 0);
+            document.getElementById('dash-cta-total').textContent = periodCtaTotal.toLocaleString();
+
+            // 投稿数合計
+            let totalPosts = 0;
+            for (const p of Object.values(d.sns.postsByPlatform || {})) totalPosts += p.total;
+            document.getElementById('dash-posts-count').textContent = totalPosts.toLocaleString();
+
+            document.getElementById('dash-scheduled').textContent = (d.sns.scheduled.pending || 0).toLocaleString();
+            document.getElementById('dash-filter').textContent = ((d.filter.blocked || 0) + (d.filter.sanitized || 0)).toLocaleString();
+
+            // データ保存範囲
+            const dr = d.dataRange || {};
+            if (dr.from) {
+                document.getElementById('dash-data-range').textContent = '📁 データ保存期間: ' + dr.from + ' 〜 ' + dr.to + '（' + dr.totalDays + '日分）';
+            }
+
+            // CTA内訳
+            const ctaLabels = { whatsapp: '💬 WhatsApp', line: '📱 LINE', telegram: '✈️ Telegram', wechat: '🟢 WeChat', phone: '📞 電話', unknown: '❓ その他' };
+            const ctaColors = { whatsapp: '#25D366', line: '#06C755', telegram: '#0088cc', wechat: '#7BB32E', phone: '#FF9800', unknown: '#999' };
+            const cta = d.ctaTotal || {};
+            let ctaHtml = '';
+            for (const [k, v] of Object.entries(cta)) {
+                ctaHtml += '<div style="text-align:center;padding:12px;background:var(--surface2);border-radius:8px">' +
+                    '<div style="font-size:24px;font-weight:700;color:' + (ctaColors[k] || '#999') + '">' + v.toLocaleString() + '</div>' +
+                    '<div style="font-size:12px;color:var(--text-muted);margin-top:4px">' + (ctaLabels[k] || k) + '</div></div>';
+            }
+            document.getElementById('dash-cta-breakdown').innerHTML = ctaHtml || '<div style="color:var(--text-muted)">データなし</div>';
+
+            // PVトレンド
+            const trend = d.trend || [];
+            const maxPv = Math.max(...trend.map(t => t.pv), 1);
+            document.getElementById('dash-chart-title').textContent = isMonthly ? '📈 PVトレンド（月別）' : '📈 PVトレンド（日別）';
+
+            // 表示件数制限: 日別は最大30件、月別は最大60件
+            const maxBars = isMonthly ? 60 : 30;
+            const displayTrend = trend.slice(-maxBars);
+
+            let chartHtml = '<div style="display:grid;grid-template-columns:80px 60px 1fr;gap:4px 8px;align-items:center">';
+            for (const t of displayTrend) {
+                const barWidth = Math.max(1, Math.round((t.pv / maxPv) * 100));
+                let dateLabel;
+                if (isMonthly) {
+                    // YYYY-MM → YYYY年M月
+                    const parts = t.date.split('-');
+                    dateLabel = parts[0] + '/' + parts[1];
+                } else {
+                    dateLabel = t.date.slice(5); // MM-DD
+                }
+                chartHtml += '<div style="color:var(--text-muted)">' + dateLabel + '</div>';
+                chartHtml += '<div style="text-align:right;font-weight:600">' + (t.pv || 0).toLocaleString() + '</div>';
+                chartHtml += '<div style="background:var(--accent);height:16px;border-radius:3px;width:' + barWidth + '%;opacity:0.8"></div>';
+            }
+            chartHtml += '</div>';
+            if (isMonthly && trend.length > 0) {
+                chartHtml += '<div style="font-size:11px;color:var(--text-muted);margin-top:8px">※ 月別集計表示（90日以上の期間選択時）</div>';
+            }
+            document.getElementById('dash-pv-chart').innerHTML = chartHtml;
+
+            // 言語別（期間合計）
+            const lang = (d.period ? d.period.lang : d.today.lang) || {};
+            const langLabels = { ja: '🇯🇵 日本語', en: '🇺🇸 English', zh: '🇨🇳 中文', fr: '🇫🇷 Français', es: '🇪🇸 Español', hi: '🇮🇳 हिन्दी' };
+            let langHtml = '';
+            const langSorted = Object.entries(lang).sort((a, b) => b[1] - a[1]);
+            for (const [k, v] of langSorted) {
+                langHtml += '<div style="text-align:center;padding:10px;background:var(--surface2);border-radius:8px">' +
+                    '<div style="font-size:20px;font-weight:700">' + v.toLocaleString() + '</div>' +
+                    '<div style="font-size:12px;color:var(--text-muted);margin-top:2px">' + (langLabels[k] || k) + '</div></div>';
+            }
+            document.getElementById('dash-lang').innerHTML = langHtml || '<div style="color:var(--text-muted)">データなし</div>';
+
+            // SNS投稿状況
+            const platformLabels = { twitter_en: 'X (EN)', twitter_ja: 'X (JA)', telegram: 'Telegram' };
+            const platforms = d.sns.postsByPlatform || {};
+            let snsHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">';
+            for (const [k, v] of Object.entries(platforms)) {
+                snsHtml += '<div style="padding:12px;background:var(--surface2);border-radius:8px">' +
+                    '<div style="font-weight:600;margin-bottom:6px">' + (platformLabels[k] || k) + '</div>' +
+                    '<div style="font-size:13px">✅ 成功: ' + v.success + '</div>' +
+                    '<div style="font-size:13px">❌ 失敗: ' + v.failed + '</div>' +
+                    '<div style="font-size:13px">合計: ' + v.total + '</div></div>';
+            }
+            snsHtml += '</div>';
+            const sched = d.sns.scheduled;
+            snsHtml += '<div style="margin-top:12px;font-size:13px;color:var(--text-muted)">' +
+                '予約投稿 — 待機: ' + sched.pending + ' / 配信済: ' + sched.posted + ' / 失敗: ' + sched.failed +
+                (sched.blocked ? ' / ブロック: ' + sched.blocked : '') + '</div>';
+            document.getElementById('dash-sns-stats').innerHTML = snsHtml;
+
+            // 最近の投稿
+            const recent = d.sns.recentPosts || [];
+            let recentHtml = '';
+            for (const p of recent.slice(0, 15)) {
+                const date = new Date(p.createdAt).toLocaleString('ja-JP', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                const plats = (p.results || []).map(r => (platformLabels[r.platform] || r.platform) + (r.success ? ' ✅' : ' ❌')).join(', ');
+                const text = (p.text || (p.results && p.results[0] && p.results[0].text) || '').slice(0, 60);
+                recentHtml += '<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">' +
+                    '<span style="color:var(--text-muted)">' + date + '</span> ' +
+                    '<span style="color:var(--accent)">[' + plats + ']</span> ' +
+                    escHtml(text) + (text.length >= 60 ? '...' : '') + '</div>';
+            }
+            document.getElementById('dash-recent-posts').innerHTML = recentHtml || '<div style="color:var(--text-muted)">投稿なし</div>';
         }
 
         // 手動投稿のドラッグ＆ドロップ

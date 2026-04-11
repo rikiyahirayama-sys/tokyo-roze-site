@@ -1,5 +1,5 @@
 // ============================================
-// Tokyo Rendaire 管理サーバー
+// TOKYO ROZE 管理サーバー
 // Express + 静的ファイル + API
 // ============================================
 try { require('dotenv').config(); } catch (e) { }
@@ -17,7 +17,7 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(session({
-    secret: process.env.ADMIN_SESSION_SECRET || 'tokyo-rendaire-secret-key',
+    secret: process.env.ADMIN_SESSION_SECRET || 'tokyo-roze-secret-key',
     resave: false,
     saveUninitialized: false,
     cookie: { maxAge: 24 * 60 * 60 * 1000 } // 24時間
@@ -33,10 +33,23 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/cast', require('./routes/cast'));
 app.use('/api/sns', require('./routes/sns'));
 app.use('/api/blog', require('./routes/blog'));
+app.use('/api/job-posting', require('./routes/job-posting'));
+app.use('/api/webhook', require('./routes/webhook'));
+app.use('/api/analytics', require('./routes/analytics'));
 
 // ===== 予約投稿スケジューラー復元 =====
 const scheduler = require('./services/scheduler');
 scheduler.restore();
+
+// ===== ブログ自動公開スケジュール（週2回：火曜・金曜10:00 JST） =====
+scheduler.scheduleBlogAuto();
+// ===== GBP自動投稿スケジュール（週3回：月・水・土 11:00 JST） =====
+scheduler.scheduleGBPAuto();
+// 毎日0:05にスケジュールを再チェック（次回分を補充）
+setInterval(() => {
+    scheduler.scheduleBlogAuto();
+    scheduler.scheduleGBPAuto();
+}, 24 * 60 * 60 * 1000);
 
 // ===== API 404ハンドラー（HTMLではなくJSONを返す） =====
 app.use('/api', (req, res) => {
@@ -60,6 +73,9 @@ server.on('listening', () => {
         ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY ? '✓ set' : '✗ missing',
         TWITTER_API_KEY: process.env.TWITTER_API_KEY ? '✓ set' : '✗ missing',
         TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN ? '✓ set' : '✗ missing',
+        WHATSAPP_API_TOKEN: process.env.WHATSAPP_API_TOKEN ? '✓ set' : '✗ missing',
+        LINE_CHANNEL_ACCESS_TOKEN: process.env.LINE_CHANNEL_ACCESS_TOKEN ? '✓ set' : '✗ missing',
+        WECHAT_TOKEN: process.env.WECHAT_TOKEN ? '✓ set' : '✗ missing',
         GITHUB_TOKEN: process.env.GITHUB_TOKEN ? '✓ set' : '✗ missing',
         ADMIN_ID: process.env.ADMIN_ID ? '✓ set' : '✗ missing',
     });

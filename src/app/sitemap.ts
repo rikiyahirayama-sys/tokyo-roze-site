@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { locales } from "@/lib/i18n/config";
 import { readSiteData } from "@/lib/store";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://tokyorendaire.com";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://tokyoroze.com";
 
 const pages = ["", "/cast", "/system", "/booking", "/contact", "/recruit"];
 

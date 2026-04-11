@@ -1,6 +1,6 @@
-// ============================================
-// ブログ管理 API
-// 記事生成・公開・一覧・削除
+﻿// ============================================
+// 繝悶Ο繧ｰ邂｡逅・API
+// 險倅ｺ狗函謌舌・蜈ｬ髢九・荳隕ｧ繝ｻ蜑企勁
 // ============================================
 const express = require('express');
 const router = express.Router();
@@ -12,9 +12,9 @@ const github = require('../services/github');
 
 const blogDir = path.join(__dirname, '..', 'blog');
 
-// ブログ記事HTMLテンプレート
+// 繝悶Ο繧ｰ險倅ｺ稀TML繝・Φ繝励Ξ繝ｼ繝・
 function generateBlogHTML({ title, meta, body, slug }) {
-    const siteUrl = process.env.SITE_URL || 'https://tokyorendaire.com';
+    const siteUrl = process.env.SITE_URL || 'https://tokyoroze.com';
     const articleUrl = `${siteUrl}/blog/${slug}.html`;
     const date = new Date().toISOString().split('T')[0];
 
@@ -92,9 +92,9 @@ body{font-family:'Noto Sans JP',sans-serif;background:#0f0f12;color:#e8e6e3;line
 </html>`;
 }
 
-// ブログ一覧ページHTML
+// 繝悶Ο繧ｰ荳隕ｧ繝壹・繧ｸHTML
 function generateBlogIndexHTML(articles) {
-    const siteUrl = process.env.SITE_URL || 'https://tokyorendaire.com';
+    const siteUrl = process.env.SITE_URL || 'https://tokyoroze.com';
     const articleList = articles.map(a => `
   <article class="article-card">
     <a href="${siteUrl}/blog/${a.slug}.html">
@@ -140,7 +140,7 @@ h1{font-family:'Cormorant Garamond',serif;font-size:2.4em;color:#C9A96E;text-ali
 </html>`;
 }
 
-// HTMLエスケープ
+// HTML繧ｨ繧ｹ繧ｱ繝ｼ繝・
 function escapeHtml(str) {
     if (!str) return '';
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -150,7 +150,7 @@ function escapeJSON(str) {
     return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
-// ローカルのblog/ディレクトリから記事一覧を取得
+// 繝ｭ繝ｼ繧ｫ繝ｫ縺ｮblog/繝・ぅ繝ｬ繧ｯ繝医Μ縺九ｉ險倅ｺ倶ｸ隕ｧ繧貞叙蠕・
 function getLocalArticles() {
     if (!fs.existsSync(blogDir)) return [];
     return fs.readdirSync(blogDir)
@@ -169,52 +169,52 @@ function getLocalArticles() {
         });
 }
 
-// ===== POST /generate — 記事自動生成 =====
+// ===== POST /generate 窶・險倅ｺ玖・蜍慕函謌・=====
 router.post('/generate', async (req, res) => {
     try {
         const { topic } = req.body;
-        console.log('[Blog] 記事生成開始 topic:', topic || '(自動)');
+        console.log('[Blog] 險倅ｺ狗函謌宣幕蟋・topic:', topic || '(閾ｪ蜍・');
         const result = await claude.generateBlogArticle(topic);
         if (result.error) {
-            console.error('[Blog] 生成エラー:', result.error);
+            console.error('[Blog] 逕滓・繧ｨ繝ｩ繝ｼ:', result.error);
             return res.json({ success: false, error: result.error });
         }
-        console.log('[Blog] 記事生成成功 title:', result.title, 'slug:', result.slug);
+        console.log('[Blog] 險倅ｺ狗函謌先・蜉・title:', result.title, 'slug:', result.slug);
         return res.json({ success: true, article: result });
     } catch (e) {
-        console.error('[Blog] 記事生成例外:', e.message);
+        console.error('[Blog] 險倅ｺ狗函謌蝉ｾ句､・', e.message);
         return res.status(500).json({ success: false, error: e.message });
     }
 });
 
-// ===== POST /publish — 記事公開 =====
+// ===== POST /publish 窶・險倅ｺ句・髢・=====
 router.post('/publish', async (req, res) => {
     try {
         const { title, slug, meta, body } = req.body;
         if (!title || !slug || !body) {
-            return res.status(400).json({ success: false, error: 'タイトル、slug、本文は必須です' });
+            return res.status(400).json({ success: false, error: '繧ｿ繧､繝医Ν縲《lug縲∵悽譁・・蠢・医〒縺・ });
         }
 
         const safeSlug = slug.replace(/[^a-zA-Z0-9-]/g, '');
         const html = generateBlogHTML({ title, meta, body, slug: safeSlug });
 
-        // ローカルに保存
+        // 繝ｭ繝ｼ繧ｫ繝ｫ縺ｫ菫晏ｭ・
         if (!fs.existsSync(blogDir)) fs.mkdirSync(blogDir, { recursive: true });
         fs.writeFileSync(path.join(blogDir, `${safeSlug}.html`), html, 'utf-8');
 
-        // ブログ一覧ページを更新
+        // 繝悶Ο繧ｰ荳隕ｧ繝壹・繧ｸ繧呈峩譁ｰ
         const articles = getLocalArticles();
         const indexHtml = generateBlogIndexHTML(articles);
         fs.writeFileSync(path.join(blogDir, 'index.html'), indexHtml, 'utf-8');
 
-        // GitHubにプッシュ（トークンがあれば）
+        // GitHub縺ｫ繝励ャ繧ｷ繝･・医ヨ繝ｼ繧ｯ繝ｳ縺後≠繧後・・・
         let githubResult = null;
         if (process.env.GITHUB_TOKEN && process.env.GITHUB_REPO) {
             githubResult = await github.pushFile(`blog/${safeSlug}.html`, html, `Add blog: ${title}`);
             await github.pushFile('blog/index.html', indexHtml, 'Update blog index');
         }
 
-        const siteUrl = process.env.SITE_URL || 'https://tokyorendaire.com';
+        const siteUrl = process.env.SITE_URL || 'https://tokyoroze.com';
         return res.json({
             success: true,
             url: `${siteUrl}/blog/${safeSlug}.html`,
@@ -225,12 +225,12 @@ router.post('/publish', async (req, res) => {
     }
 });
 
-// ===== POST /manual — 手動記事公開 =====
+// ===== POST /manual 窶・謇句虚險倅ｺ句・髢・=====
 router.post('/manual', async (req, res) => {
     try {
         const { title, slug, meta, body } = req.body;
         if (!title || !slug || !body) {
-            return res.status(400).json({ success: false, error: 'タイトル、slug、本文は必須です' });
+            return res.status(400).json({ success: false, error: '繧ｿ繧､繝医Ν縲《lug縲∵悽譁・・蠢・医〒縺・ });
         }
 
         const safeSlug = slug.replace(/[^a-zA-Z0-9-]/g, '');
@@ -239,25 +239,25 @@ router.post('/manual', async (req, res) => {
         if (!fs.existsSync(blogDir)) fs.mkdirSync(blogDir, { recursive: true });
         fs.writeFileSync(path.join(blogDir, `${safeSlug}.html`), html, 'utf-8');
 
-        // ブログ一覧ページを更新
+        // 繝悶Ο繧ｰ荳隕ｧ繝壹・繧ｸ繧呈峩譁ｰ
         const articles = getLocalArticles();
         const indexHtml = generateBlogIndexHTML(articles);
         fs.writeFileSync(path.join(blogDir, 'index.html'), indexHtml, 'utf-8');
 
-        // GitHubにプッシュ（トークンがあれば）
+        // GitHub縺ｫ繝励ャ繧ｷ繝･・医ヨ繝ｼ繧ｯ繝ｳ縺後≠繧後・・・
         if (process.env.GITHUB_TOKEN && process.env.GITHUB_REPO) {
             await github.pushFile(`blog/${safeSlug}.html`, html, `Add blog: ${title}`);
             await github.pushFile('blog/index.html', indexHtml, 'Update blog index');
         }
 
-        const siteUrl = process.env.SITE_URL || 'https://tokyorendaire.com';
+        const siteUrl = process.env.SITE_URL || 'https://tokyoroze.com';
         return res.json({ success: true, url: `${siteUrl}/blog/${safeSlug}.html` });
     } catch (e) {
         return res.status(500).json({ success: false, error: e.message });
     }
 });
 
-// ===== GET /list — 記事一覧 =====
+// ===== GET /list 窶・險倅ｺ倶ｸ隕ｧ =====
 router.get('/list', (req, res) => {
     try {
         const articles = getLocalArticles();
@@ -267,23 +267,23 @@ router.get('/list', (req, res) => {
     }
 });
 
-// ===== DELETE /:slug — 記事削除 =====
+// ===== DELETE /:slug 窶・險倅ｺ句炎髯､ =====
 router.delete('/:slug', async (req, res) => {
     try {
         const safeSlug = req.params.slug.replace(/[^a-zA-Z0-9-]/g, '');
         const filePath = path.join(blogDir, `${safeSlug}.html`);
 
-        // ローカル削除
+        // 繝ｭ繝ｼ繧ｫ繝ｫ蜑企勁
         if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
         }
 
-        // ブログ一覧ページを更新
+        // 繝悶Ο繧ｰ荳隕ｧ繝壹・繧ｸ繧呈峩譁ｰ
         const articles = getLocalArticles();
         const indexHtml = generateBlogIndexHTML(articles);
         fs.writeFileSync(path.join(blogDir, 'index.html'), indexHtml, 'utf-8');
 
-        // GitHubからも削除（トークンがあれば）
+        // GitHub縺九ｉ繧ょ炎髯､・医ヨ繝ｼ繧ｯ繝ｳ縺後≠繧後・・・
         if (process.env.GITHUB_TOKEN && process.env.GITHUB_REPO) {
             await github.deleteFile(`blog/${safeSlug}.html`, `Delete blog: ${safeSlug}`);
             await github.pushFile('blog/index.html', indexHtml, 'Update blog index');

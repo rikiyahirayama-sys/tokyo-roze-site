@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { blogDir, validateLegacySession } from "@/lib/legacy-helpers";
 import fs from "fs";
 import path from "path";
@@ -19,7 +19,7 @@ function escapeJSON(str: string): string {
 }
 
 function generateBlogHTML({ title, meta, body, slug }: { title: string; meta: string; body: string; slug: string }) {
-    const siteUrl = process.env.SITE_URL || "https://tokyorendaire.com";
+    const siteUrl = process.env.SITE_URL || "https://tokyoroze.com";
     const articleUrl = `${siteUrl}/blog/${slug}.html`;
     const date = new Date().toISOString().split("T")[0];
     return `<!DOCTYPE html>
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     try {
         const { title, slug, meta, body } = await request.json();
         if (!title || !slug || !body) {
-            return NextResponse.json({ success: false, error: "タイトル、slug、本文は必須です" }, { status: 400 });
+            return NextResponse.json({ success: false, error: "繧ｿ繧､繝医Ν縲《lug縲∵悽譁・・蠢・医〒縺・ }, { status: 400 });
         }
 
         const safeSlug = slug.replace(/[^a-zA-Z0-9-]/g, "");
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
             await github.pushFile(`blog/${safeSlug}.html`, html, `Add blog: ${title}`);
         }
 
-        const siteUrl = process.env.SITE_URL || "https://tokyorendaire.com";
+        const siteUrl = process.env.SITE_URL || "https://tokyoroze.com";
         return NextResponse.json({ success: true, url: `${siteUrl}/blog/${safeSlug}.html` });
     } catch (e) {
         return NextResponse.json({ success: false, error: (e as Error).message }, { status: 500 });

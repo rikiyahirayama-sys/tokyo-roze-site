@@ -43,7 +43,7 @@ export default function ContactPage({
                         <div className="mb-4">
                             <WeChatButton text={t("wechat")} />
                         </div>
-                        <p className="text-dark-500 text-xs">{t("wechatId")}: TOKYORENDAIRE</p>
+                        <p className="text-dark-500 text-xs">{t("wechatId")}: TOKYOROZE</p>
                     </div>
                     <div className="card p-6 text-center">
                         <div className="mb-4">

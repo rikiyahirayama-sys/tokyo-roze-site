@@ -33,7 +33,7 @@ function resetState(userId: string) {
     conversations.delete(userId);
 }
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://tokyorendaire.com";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://tokyoroze.com";
 
 /**
  * Generate AI auto-reply based on conversation state and incoming message.

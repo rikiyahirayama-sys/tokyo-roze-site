@@ -6,7 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import type { Metadata } from "next";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://tokyorendaire.com";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://tokyoroze.com";
 
 const hreflangMap: Record<string, string> = {
     en: "en",

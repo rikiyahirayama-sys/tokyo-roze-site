@@ -67,7 +67,7 @@ export default function Footer() {
                                 WhatsApp
                             </a>
                             <span className="text-dark-400 text-sm">
-                                WeChat: tokyorendaire
+                                WeChat: tokyoroze
                             </span>
                             <a
                                 href={`https://line.me/R/ti/p/${process.env.NEXT_PUBLIC_LINE_ID || ''}`}

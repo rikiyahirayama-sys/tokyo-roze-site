@@ -15,7 +15,7 @@ const calendarCasts: CalendarCastEntry[] = [
     {
         castId: "yui",
         castName: "Yui",
-        calendarId: "yui@tokyorendaire.com",
+        calendarId: "yui@tokyoroze.com",
         lastSynced: "2026-03-22T14:30:00",
         status: "synced",
         todaySchedule: [{ start: "18:00", end: "05:00" }],
@@ -23,7 +23,7 @@ const calendarCasts: CalendarCastEntry[] = [
     {
         castId: "hana",
         castName: "Hana",
-        calendarId: "hana@tokyorendaire.com",
+        calendarId: "hana@tokyoroze.com",
         lastSynced: "2026-03-22T14:30:00",
         status: "synced",
         todaySchedule: [{ start: "20:00", end: "03:00" }],

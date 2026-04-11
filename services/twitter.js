@@ -1,10 +1,14 @@
 // ============================================
 // Twitter(X) 投稿サービス
 // 英語アカウント・日本語アカウントの2系統
+// ⚠️ アカウント凍結時は自動スキップ
 // ============================================
 const { TwitterApi } = require('twitter-api-v2');
 const fs = require('fs');
 const path = require('path');
+
+// アカウント凍結フラグ — trueの間は全投稿をスキップ
+let suspended = true; // 2026-04-08: @Tokyo_Rendaire アカウント凍結により無効化
 
 let clientEN = null;
 let clientJA = null;
@@ -84,6 +88,10 @@ function getClient(account) {
 
 // ツイート投稿
 async function postTweet(text, imagePath, account = 'en') {
+    if (suspended) {
+        console.log(`[Twitter] ⚠️ アカウント凍結中のためスキップ account=${account}`);
+        return { success: false, error: 'X(Twitter)アカウントが凍結中です。投稿をスキップしました。', suspended: true };
+    }
     try {
         // テキストの正規化
         if (Array.isArray(text)) {
@@ -115,7 +123,7 @@ async function postTweet(text, imagePath, account = 'en') {
         const params = mediaId ? { media: { media_ids: [mediaId] } } : {};
         const result = await tw.v2.tweet(text, params);
         console.log(`[Twitter] 投稿成功 account=${account} tweetId=${result.data.id}`);
-        return { success: true, tweetId: result.data.id };
+        return { success: true, tweetId: result.data.id, account };
     } catch (e) {
         // X APIエラーの詳細を出力
         const code = e.code || e.statusCode || '';
@@ -142,6 +150,9 @@ async function postTweet(text, imagePath, account = 'en') {
 
 // ツイート削除
 async function deleteTweet(tweetId, account = 'en') {
+    if (suspended) {
+        return { success: false, error: 'X(Twitter)アカウントが凍結中です', suspended: true };
+    }
     try {
         const tw = getClient(account);
         if (!tw) {
@@ -156,6 +167,9 @@ async function deleteTweet(tweetId, account = 'en') {
 
 // 接続確認（Freeプラン対応: v2.me()が使えないためtweet投稿→即削除で検証）
 async function verifyCredentials(account = 'en') {
+    if (suspended) {
+        return { success: false, error: 'X(Twitter)アカウントが凍結中です', suspended: true };
+    }
     try {
         const tw = getClient(account);
         if (!tw) {
@@ -175,4 +189,78 @@ async function verifyCredentials(account = 'en') {
     }
 }
 
-module.exports = { postTweet, deleteTweet, verifyCredentials, reinitialize };
+// ===== ツイート指標取得（Twitter API v2） =====
+async function fetchMetrics(tweetIds, account = 'en') {
+    if (suspended) return { success: false, error: 'アカウント凍結中', suspended: true };
+    try {
+        const tw = getClient(account);
+        if (!tw) return { success: false, error: `${account}アカウント未設定` };
+
+        // 最大100件ずつ取得
+        const ids = Array.isArray(tweetIds) ? tweetIds : [tweetIds];
+        if (ids.length === 0) return { success: true, tweets: [] };
+
+        const chunks = [];
+        for (let i = 0; i < ids.length; i += 100) {
+            chunks.push(ids.slice(i, i + 100));
+        }
+
+        const allTweets = [];
+        for (const chunk of chunks) {
+            const result = await tw.v2.tweets(chunk, {
+                'tweet.fields': 'public_metrics,created_at',
+            });
+            if (result.data) {
+                for (const tweet of result.data) {
+                    const m = tweet.public_metrics || {};
+                    allTweets.push({
+                        id: tweet.id,
+                        text: tweet.text,
+                        createdAt: tweet.created_at,
+                        impressions: m.impression_count || 0,
+                        likes: m.like_count || 0,
+                        retweets: m.retweet_count || 0,
+                        replies: m.reply_count || 0,
+                        quotes: m.quote_count || 0,
+                        bookmarks: m.bookmark_count || 0,
+                    });
+                }
+            }
+        }
+        return { success: true, tweets: allTweets };
+    } catch (e) {
+        console.error(`[Twitter] fetchMetrics(${account}) エラー:`, e.message);
+        return { success: false, error: e.message };
+    }
+}
+
+// ===== アカウント情報取得（フォロワー数等） =====
+async function fetchAccountInfo(account = 'en') {
+    if (suspended) return { success: false, error: 'アカウント凍結中', suspended: true };
+    try {
+        const tw = getClient(account);
+        if (!tw) return { success: false, error: `${account}アカウント未設定` };
+
+        const me = await tw.v2.me({ 'user.fields': 'public_metrics,created_at,description,profile_image_url' });
+        const m = me.data.public_metrics || {};
+        return {
+            success: true,
+            data: {
+                id: me.data.id,
+                username: me.data.username,
+                name: me.data.name,
+                followers: m.followers_count || 0,
+                following: m.following_count || 0,
+                tweets: m.tweet_count || 0,
+                listed: m.listed_count || 0,
+                createdAt: me.data.created_at,
+                profileImage: me.data.profile_image_url,
+            }
+        };
+    } catch (e) {
+        console.error(`[Twitter] fetchAccountInfo(${account}) エラー:`, e.message);
+        return { success: false, error: e.message };
+    }
+}
+
+module.exports = { postTweet, deleteTweet, verifyCredentials, reinitialize, isSuspended: () => suspended, setSuspended: (v) => { suspended = !!v; }, fetchMetrics, fetchAccountInfo };

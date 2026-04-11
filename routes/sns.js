@@ -9,9 +9,11 @@ const path = require('path');
 const fs = require('fs');
 
 const claude = require('../services/claude');
-const twitter = require('../services/twitter');
 const telegram = require('../services/telegram');
+const reddit = require('../services/reddit');
+const gbp = require('../services/gbp');
 const scheduler = require('../services/scheduler');
+const { filterPosts, checkContent, sanitizeContent } = require('../services/content-filter');
 
 // データファイルパス
 const dataDir = path.join(__dirname, '..', 'data');
@@ -80,7 +82,10 @@ router.post('/generate', async (req, res) => {
         const { topics } = req.body;
         const result = await claude.generateWeeklyPosts(topics);
         if (result.error) return res.json({ success: false, error: result.error });
-        return res.json({ success: true, posts: result });
+
+        // コンテンツフィルター適用
+        const { posts: filtered, report } = filterPosts(result);
+        return res.json({ success: true, posts: filtered, filterReport: report });
     } catch (e) {
         return res.status(500).json({ success: false, error: e.message });
     }
@@ -89,33 +94,39 @@ router.post('/generate', async (req, res) => {
 // ===== POST /post — 一括投稿 =====
 router.post('/post', async (req, res) => {
     try {
-        const { posts } = req.body;
+        const { posts: rawPosts } = req.body;
+        // 投稿前にコンテンツフィルターを適用
+        const { posts, report: filterReport } = filterPosts(rawPosts || {});
+        if (filterReport.blocked.length > 0) {
+            console.error('[SNS] ⚠️ NGワード検出により投稿ブロック:', filterReport.blocked);
+            return res.status(400).json({ success: false, error: 'NGワードが検出されました。投稿内容を修正してください。', filterReport });
+        }
         const results = [];
         console.log('[SNS] 一括投稿開始:', Object.keys(posts || {}));
 
-        // X英語
-        if (posts.twitter_en && Array.isArray(posts.twitter_en)) {
-            for (const post of posts.twitter_en) {
+        // Telegram EN（集客・英語圏向け）
+        if (posts.telegram_en && Array.isArray(posts.telegram_en)) {
+            for (const post of posts.telegram_en) {
                 const text = typeof post === 'string' ? post : post.text;
-                const r = await twitter.postTweet(text, null, 'en');
-                console.log('[SNS] twitter_en 結果:', r.success ? '✅' : '❌', r.error || '');
-                results.push({ platform: 'twitter_en', text, ...r });
+                const r = await telegram.postToChannel(text);
+                console.log('[SNS] telegram_en 結果:', r.success ? '✅' : '❌', r.error || '');
+                results.push({ platform: 'telegram_en', text, ...r });
                 await delay(3000);
             }
         }
 
-        // X日本語
-        if (posts.twitter_ja && Array.isArray(posts.twitter_ja)) {
-            for (const post of posts.twitter_ja) {
+        // Telegram JA（求人・日本語向け）
+        if (posts.telegram_ja && Array.isArray(posts.telegram_ja)) {
+            for (const post of posts.telegram_ja) {
                 const text = typeof post === 'string' ? post : post.text;
-                const r = await twitter.postTweet(text, null, 'ja');
-                console.log('[SNS] twitter_ja 結果:', r.success ? '✅' : '❌', r.error || '');
-                results.push({ platform: 'twitter_ja', text, ...r });
+                const r = await telegram.postToChannel(text);
+                console.log('[SNS] telegram_ja 結果:', r.success ? '✅' : '❌', r.error || '');
+                results.push({ platform: 'telegram_ja', text, ...r });
                 await delay(3000);
             }
         }
 
-        // Telegram
+        // Telegram（一般チャンネル）
         if (posts.telegram && Array.isArray(posts.telegram)) {
             for (const post of posts.telegram) {
                 const text = typeof post === 'string' ? post : post.text;
@@ -123,6 +134,19 @@ router.post('/post', async (req, res) => {
                 console.log('[SNS] telegram 結果:', r.success ? '✅' : '❌', r.error || '');
                 results.push({ platform: 'telegram', text, ...r });
                 await delay(3000);
+            }
+        }
+
+        // Reddit（集客・英語圏向け）
+        if (posts.reddit && Array.isArray(posts.reddit)) {
+            for (const post of posts.reddit) {
+                const title = typeof post === 'string' ? post : post.title;
+                const text = typeof post === 'string' ? '' : (post.text || '');
+                const subreddit = typeof post === 'string' ? 'Tokyo' : (post.subreddit || 'Tokyo');
+                const r = await reddit.postToSubreddit(subreddit, title, text);
+                console.log(`[SNS] reddit r/${subreddit} 結果:`, r.success ? '✅' : '❌', r.error || '');
+                results.push({ platform: 'reddit', subreddit, title, ...r });
+                await delay(5000); // Reddit rate limit対策
             }
         }
 
@@ -147,7 +171,20 @@ router.post('/post', async (req, res) => {
 // ===== POST /manual — 手動投稿 =====
 router.post('/manual', upload.array('images', 5), async (req, res) => {
     try {
-        const { text, platforms } = req.body;
+        const { text: rawText, platforms } = req.body;
+        // 手動投稿にもコンテンツフィルター適用
+        const contentCheck = checkContent(rawText);
+        let text = rawText;
+        if (!contentCheck.safe) {
+            const { text: sanitized, replacements } = sanitizeContent(rawText);
+            console.log('[SNS] 手動投稿NGワード置換:', replacements);
+            // 再チェック — まだNGなら拒否
+            const recheck = checkContent(sanitized);
+            if (!recheck.safe) {
+                return res.status(400).json({ success: false, error: 'NGワードが含まれています。投稿内容を修正してください。', blocked: recheck.blocked });
+            }
+            text = sanitized;
+        }
         const platformList = typeof platforms === 'string' ? JSON.parse(platforms) : (platforms || []);
         const imagePath = (req.files && req.files.length > 0) ? path.join('uploads', req.files[0].filename) : null;
         const results = [];
@@ -155,22 +192,24 @@ router.post('/manual', upload.array('images', 5), async (req, res) => {
 
         for (const platform of platformList) {
             switch (platform) {
-                case 'twitter_en': {
-                    const r = await twitter.postTweet(text, imagePath, 'en');
-                    console.log('[SNS] twitter_en 結果:', r.success ? '✅' : '❌', r.error || '');
-                    results.push({ platform: 'twitter_en', ...r });
-                    break;
-                }
-                case 'twitter_ja': {
-                    const r = await twitter.postTweet(text, imagePath, 'ja');
-                    console.log('[SNS] twitter_ja 結果:', r.success ? '✅' : '❌', r.error || '');
-                    results.push({ platform: 'twitter_ja', ...r });
-                    break;
-                }
+                case 'telegram_en':
+                case 'telegram_ja':
                 case 'telegram': {
                     const r = await telegram.postToChannel(text, imagePath);
-                    console.log('[SNS] telegram 結果:', r.success ? '✅' : '❌', r.error || '');
-                    results.push({ platform: 'telegram', ...r });
+                    console.log(`[SNS] ${platform} 結果:`, r.success ? '✅' : '❌', r.error || '');
+                    results.push({ platform, ...r });
+                    break;
+                }
+                case 'reddit': {
+                    const r = await reddit.postToSubreddit('Tokyo', text.substring(0, 100), text);
+                    console.log('[SNS] reddit 結果:', r.success ? '✅' : '❌', r.error || '');
+                    results.push({ platform: 'reddit', ...r });
+                    break;
+                }
+                case 'gbp': {
+                    const r = await gbp.createPost(text);
+                    console.log('[SNS] gbp 結果:', r.success ? '✅' : '❌', r.error || '');
+                    results.push({ platform: 'gbp', ...r });
                     break;
                 }
             }
@@ -249,8 +288,11 @@ router.post('/template', async (req, res) => {
 
         if (posts.error) return res.json({ success: false, error: posts.error });
 
+        // コンテンツフィルター適用
+        const { posts: filteredPosts, report: filterReport } = filterPosts(posts);
+
         // 生成結果のみ返す（投稿はフロント側で/postを呼ぶ）
-        return res.json({ success: true, posts, type });
+        return res.json({ success: true, posts: filteredPosts, type, filterReport });
     } catch (e) {
         return res.status(500).json({ success: false, error: e.message });
     }

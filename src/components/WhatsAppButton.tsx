@@ -10,8 +10,8 @@ export default function WhatsAppButton({
     const encodedMessage = encodeURIComponent(
         message || "Hello, I'd like to make a booking."
     );
-    // Replace with actual phone number
-    const href = `https://wa.me/81XXXXXXXXXX?text=${encodedMessage}`;
+    const phone = process.env.NEXT_PUBLIC_WHATSAPP_PHONE?.replace(/[^0-9]/g, '') || '';
+    const href = `https://wa.me/${phone}?text=${encodedMessage}`;
 
     if (iconOnly) {
         return (

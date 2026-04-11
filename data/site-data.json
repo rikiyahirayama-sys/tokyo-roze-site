@@ -1,15 +1,15 @@
 {
   "settings": {
-    "storeName": "TOKYO RENDAIRE",
-    "storeSubtitle": "Tokyo Premium Escort",
+    "storeName": "TOKYO ROZE",
+    "storeSubtitle": "Tokyo Premium Hospitality",
     "openTime": "17:00",
     "closeTime": "05:00",
     "phone": "+81-XX-XXXX-XXXX",
     "email": "",
     "address": "東京都港区六本木",
-    "siteUrl": "https://tokyorendaire.com",
-    "metaTitle": "TOKYO RENDAIRE — Tokyo Premium Escort",
-    "metaDescription": "Premium escort service in Tokyo. International guests welcome.",
+    "siteUrl": "https://tokyoroze.com",
+    "metaTitle": "TOKYO ROZE — Tokyo Premium Hospitality",
+    "metaDescription": "Premium hospitality service in Tokyo. International guests welcome.",
     "nominationFee": 2000,
     "extensionRate30min": 10000,
     "cancelFee": 0,
@@ -35,7 +35,7 @@
     },
     "wechat": {
       "enabled": true,
-      "accountId": "tokyorendaire"
+      "accountId": "tokyoroze"
     },
     "line": {
       "enabled": true,
