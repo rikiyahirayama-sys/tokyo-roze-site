@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { blogDir, validateLegacySession } from "@/lib/legacy-helpers";
 import fs from "fs";
 import path from "path";
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     try {
         const { title, slug, meta, body } = await request.json();
         if (!title || !slug || !body) {
-            return NextResponse.json({ success: false, error: "繧ｿ繧､繝医Ν縲《lug縲∵悽譁・・蠢・医〒縺・ }, { status: 400 });
+            return NextResponse.json({ success: false, error: "タイトル、slug、本文は必須です" }, { status: 400 });
         }
 
         const safeSlug = slug.replace(/[^a-zA-Z0-9-]/g, "");
