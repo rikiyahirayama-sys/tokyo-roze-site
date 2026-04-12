@@ -1,1 +1,52 @@
-[]
+[
+  {
+    "id": 1775959055081,
+    "batchId": 1775959055079,
+    "platform": "blog_auto",
+    "text": "SEOブログ記事自動生成・公開",
+    "day": "火曜",
+    "scheduledAt": "2026-04-14T10:00:00+09:00",
+    "status": "scheduled",
+    "createdAt": "2026-04-12T01:57:35.084Z"
+  },
+  {
+    "id": 1775959055084,
+    "batchId": 1775959055079,
+    "platform": "blog_auto",
+    "text": "SEOブログ記事自動生成・公開",
+    "day": "金曜",
+    "scheduledAt": "2026-04-17T10:00:00+09:00",
+    "status": "scheduled",
+    "createdAt": "2026-04-12T01:57:35.084Z"
+  },
+  {
+    "id": 1775959055190,
+    "batchId": 1775959055089,
+    "platform": "gbp",
+    "text": "Discover premium hospitality in the heart of Roppongi, Tokyo. Our carefully selected concierge team provides an unforgettable evening experience. Visit tokyoroze.com to learn more.",
+    "day": "月曜",
+    "scheduledAt": "2026-04-13T11:00:00+09:00",
+    "status": "scheduled",
+    "createdAt": "2026-04-12T01:57:35.089Z"
+  },
+  {
+    "id": 1775959055192,
+    "batchId": 1775959055089,
+    "platform": "gbp",
+    "text": "Looking for an exceptional night out in Tokyo? Our Roppongi-based luxury concierge service offers personalized experiences for discerning guests. Book at tokyoroze.com",
+    "day": "水曜",
+    "scheduledAt": "2026-04-15T11:00:00+09:00",
+    "status": "scheduled",
+    "createdAt": "2026-04-12T01:57:35.089Z"
+  },
+  {
+    "id": 1775959055195,
+    "batchId": 1775959055089,
+    "platform": "gbp",
+    "text": "Weekend in Tokyo? Experience the finest hospitality Roppongi has to offer. Our premium concierge service is available 7 days a week, 5PM-5AM. Details at tokyoroze.com",
+    "day": "土曜",
+    "scheduledAt": "2026-04-18T11:00:00+09:00",
+    "status": "scheduled",
+    "createdAt": "2026-04-12T01:57:35.089Z"
+  }
+]

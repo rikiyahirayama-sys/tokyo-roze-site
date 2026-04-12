@@ -28,6 +28,20 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/blog', express.static(path.join(__dirname, 'blog')));
 
+// デバッグ用: publicディレクトリのファイル一覧
+app.get('/debug-files', (req, res) => {
+    const fs = require('fs');
+    const publicDir = path.join(__dirname, 'public');
+    try {
+        const files = fs.readdirSync(publicDir);
+        const adminExists = fs.existsSync(path.join(publicDir, 'admin.html'));
+        const indexExists = fs.existsSync(path.join(publicDir, 'index.html'));
+        res.json({ publicDir, files, adminExists, indexExists, cwd: process.cwd(), dirname: __dirname });
+    } catch (e) {
+        res.json({ error: e.message, publicDir, cwd: process.cwd(), dirname: __dirname });
+    }
+});
+
 // ===== APIルーティング =====
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/cast', require('./routes/cast'));
