@@ -51,10 +51,14 @@ const CONTENT_RULES = `
 // JSONレスポンスをパースする共通関数
 async function askJSON(prompt, maxTokens = 4096) {
     const text = await ask(prompt, maxTokens);
-    // JSON部分を抽出
-    const match = text.match(/\{[\s\S]*\}/);
-    if (!match) throw new Error('JSON形式のレスポンスが取得できませんでした');
-    return JSON.parse(match[0]);
+    // JSON部分を抽出（ネストされた{}に対応）
+    let depth = 0, start = -1, end = -1;
+    for (let i = 0; i < text.length; i++) {
+        if (text[i] === '{') { if (depth === 0) start = i; depth++; }
+        else if (text[i] === '}') { depth--; if (depth === 0) { end = i; break; } }
+    }
+    if (start === -1 || end === -1) throw new Error('JSON形式のレスポンスが取得できませんでした');
+    return JSON.parse(text.substring(start, end + 1));
 }
 
 // ===== プロフィール翻訳 =====
@@ -357,7 +361,7 @@ ${CONTENT_RULES}
 
 各プラットフォーム必ず7本（毎日1本）生成してください。
 TOKYO ROZEは東京・六本木のプレミアムホスピタリティサービスです。
-`, 8192);
+`, 16384);
     } catch (e) {
         return { error: e.message };
     }
