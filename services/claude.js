@@ -4,7 +4,7 @@
 // ============================================
 const Anthropic = require('@anthropic-ai/sdk');
 
-const MODEL = 'claude-3-7-sonnet-20250219';
+const MODEL = 'claude-3-5-sonnet-latest';
 let client = null;
 
 // クライアント初期化
