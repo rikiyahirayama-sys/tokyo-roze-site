@@ -17,7 +17,7 @@ export async function generateMetadata({
 }) {
     const t = await getTranslations({ locale, namespace: "hero" });
     return {
-        title: `TOKYO RENDAIRE — ${t("title")} | ${t("subtitle")}`,
+        title: `TOKYO ROZE — ${t("title")} | ${t("subtitle")}`,
         description: t("description"),
     };
 }

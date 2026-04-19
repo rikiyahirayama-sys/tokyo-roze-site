@@ -1,6 +1,6 @@
-# Tokyo Rendaire 管理システム
+﻿# TOKYO ROZE 管理システム
 
-Tokyo Rendaire（tokyorendaire.com）の管理サーバーシステムです。
+TOKYO ROZE（tokyoroze.com）の管理サーバーシステムです。
 SNS自動投稿・ブログ管理・キャスト管理をExpressサーバーベースで提供します。
 
 ## セットアップ

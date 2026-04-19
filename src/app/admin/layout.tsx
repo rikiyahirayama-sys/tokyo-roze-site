@@ -24,7 +24,7 @@ function AdminSidebar({ onLogout }: { onLogout: () => void }) {
         <aside className="w-64 bg-dark-950 border-r border-dark-800/30 min-h-screen flex flex-col">
             <div className="p-6 border-b border-dark-800/30">
                 <h1 className="font-display text-xl font-bold gold-accent">管理パネル</h1>
-                <p className="text-dark-500 text-xs mt-1">TOKYO RENDAIRE</p>
+                <p className="text-dark-500 text-xs mt-1">TOKYO ROZE</p>
             </div>
             <nav className="flex-1 py-4">
                 {navItems.map((item) => (
@@ -87,7 +87,7 @@ function AdminLogin({ onLogin }: { onLogin: () => void }) {
         <div className="min-h-screen bg-dark-950 flex items-center justify-center">
             <div className="card p-8 w-full max-w-md">
                 <h1 className="font-display text-2xl font-bold gold-accent text-center mb-2">管理パネル</h1>
-                <p className="text-dark-400 text-center text-sm mb-8">TOKYO RENDAIRE</p>
+                <p className="text-dark-400 text-center text-sm mb-8">TOKYO ROZE</p>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>

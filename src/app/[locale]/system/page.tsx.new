@@ -1,4 +1,4 @@
-import { useTranslations } from "next-intl";
+﻿import { useTranslations } from "next-intl";
 import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 import Link from "next/link";
 import { readSiteData } from "@/lib/store";
@@ -11,7 +11,7 @@ export async function generateMetadata({
 }) {
     const t = await getTranslations({ locale, namespace: "system" });
     return {
-        title: `${t("title")} — TOKYO RENDAIRE`,
+        title: `${t("title")} — TOKYO ROZE`,
         description: t("subtitle"),
     };
 }

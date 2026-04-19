@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
                     headers: {
                         "Authorization": `token ${process.env.GITHUB_TOKEN}`,
                         "Accept": "application/vnd.github.v3+json",
-                        "User-Agent": "Tokyo-Rendaire-Admin",
+                        "User-Agent": "Tokyo-Roze-Admin",
                     },
                 });
                 const data = await res.json();

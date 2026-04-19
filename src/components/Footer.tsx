@@ -18,13 +18,13 @@ export default function Footer() {
                         <div className="flex items-center gap-3 mb-3">
                             <Image
                                 src="/images/logo.png"
-                                alt="TOKYO RENDAIRE"
+                                alt="TOKYO ROZE"
                                 width={36}
                                 height={36}
                                 className="w-9 h-9 object-contain"
                             />
                             <h3 className="font-display text-xl font-bold gold-accent">
-                                TOKYO RENDAIRE
+                                TOKYO ROZE
                             </h3>
                         </div>
                         <p className="text-dark-400 text-sm leading-relaxed">

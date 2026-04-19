@@ -9,7 +9,6 @@ const path = require('path');
 const fs = require('fs');
 
 const claude = require('../services/claude');
-const twitter = require('../services/twitter');
 const telegram = require('../services/telegram');
 
 // データファイルパス
@@ -176,16 +175,6 @@ router.post('/:id/announce', async (req, res) => {
         const imagePath = cast.photos && cast.photos.length > 0 ? cast.photos[0] : null;
         const results = [];
 
-        // X英語
-        if (posts.twitter_en) {
-            const r = await twitter.postTweet(posts.twitter_en, imagePath, 'en');
-            results.push({ platform: 'twitter_en', ...r });
-        }
-        // X日本語
-        if (posts.twitter_ja) {
-            const r = await twitter.postTweet(posts.twitter_ja, imagePath, 'ja');
-            results.push({ platform: 'twitter_ja', ...r });
-        }
         // Telegram
         if (posts.telegram) {
             const r = await telegram.postToChannel(posts.telegram, imagePath);

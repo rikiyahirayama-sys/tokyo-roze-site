@@ -17,26 +17,9 @@ export async function POST(request: NextRequest) {
     }
     try {
         const { posts } = await request.json();
-        const twitter = require("../../../../../services/twitter");
         const telegram = require("../../../../../services/telegram");
         const results: { platform: string; text: string;[k: string]: unknown }[] = [];
 
-        if (posts.twitter_en && Array.isArray(posts.twitter_en)) {
-            for (const post of posts.twitter_en) {
-                const text = typeof post === "string" ? post : post.text;
-                const r = await twitter.postTweet(text, null, "en");
-                results.push({ platform: "twitter_en", text, ...r });
-                await delay(3000);
-            }
-        }
-        if (posts.twitter_ja && Array.isArray(posts.twitter_ja)) {
-            for (const post of posts.twitter_ja) {
-                const text = typeof post === "string" ? post : post.text;
-                const r = await twitter.postTweet(text, null, "ja");
-                results.push({ platform: "twitter_ja", text, ...r });
-                await delay(3000);
-            }
-        }
         if (posts.telegram && Array.isArray(posts.telegram)) {
             for (const post of posts.telegram) {
                 const text = typeof post === "string" ? post : post.text;

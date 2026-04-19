@@ -39,7 +39,7 @@ export async function generateMetadata({
             languages: alternates,
         },
         openGraph: {
-            siteName: "TOKYO RENDAIRE",
+            siteName: "TOKYO ROZE",
             locale: hreflangMap[locale],
             type: "website",
             url: `${BASE_URL}/${locale}`,
@@ -68,7 +68,7 @@ export default async function LocaleLayout({
     const jsonLd = {
         "@context": "https://schema.org",
         "@type": "LocalBusiness",
-        name: "TOKYO RENDAIRE",
+        name: "TOKYO ROZE",
         url: `${BASE_URL}/${locale}`,
         telephone: "+81-XX-XXXX-XXXX",
         address: {

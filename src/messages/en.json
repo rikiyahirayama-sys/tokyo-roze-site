@@ -1,6 +1,6 @@
-{
+﻿{
     "common": {
-        "storeName": "TOKYO RENDAIRE",
+        "storeName": "TOKYO ROZE",
         "tagline": "Exclusive Escort Service in Tokyo",
         "bookNow": "Book Now",
         "viewDetails": "View Details",
@@ -30,7 +30,7 @@
     },
     "about": {
         "title": "About Us",
-        "description": "TOKYO RENDAIRE is a licensed outcall escort (delivery health) service catering to international visitors and residents in Tokyo. We pride ourselves on providing the highest quality experience with carefully selected companions who are fluent in communication and dedicated to ensuring your complete satisfaction.",
+        "description": "TOKYO ROZE is a licensed outcall escort (delivery health) service catering to international visitors and residents in Tokyo. We pride ourselves on providing the highest quality experience with carefully selected companions who are fluent in communication and dedicated to ensuring your complete satisfaction.",
         "point1": "Fully licensed & legally compliant",
         "point2": "Carefully selected premium companions",
         "point3": "Hotel & residence outcall service",
@@ -142,7 +142,7 @@
     },
     "recruit": {
         "title": "Work With Us",
-        "heroTitle": "Join TOKYO RENDAIRE",
+        "heroTitle": "Join TOKYO ROZE",
         "heroSubtitle": "Industry-leading compensation with complete freedom and flexibility",
         "hiringNow": "Now Hiring",
         "backRate": "Free Back Rate",
@@ -157,7 +157,7 @@
         "simMonthly": "Monthly (5 days/week)",
         "simNoteMonthly": "¥134,400 × 20 days/month",
         "simTips": "Plus tips of ¥5,000–¥30,000 per session",
-        "whyUs": "Why TOKYO RENDAIRE?",
+        "whyUs": "Why TOKYO ROZE?",
         "earning": "Top Earnings",
         "earningDesc": "70% free / 80% nominated — the industry's highest commission. Your effort is rewarded.",
         "schedule": "Work From Home",
@@ -213,7 +213,7 @@
     "footer": {
         "legal": "This service operates under a valid license as per Japan's Entertainment Business Control Act (風営法届出済).",
         "disclaimer": "All companions are 18 years of age or older. Valid ID verification is required.",
-        "copyright": "© 2026 TOKYO RENDAIRE. All rights reserved.",
+        "copyright": "© 2026 TOKYO ROZE. All rights reserved.",
         "privacy": "Privacy Policy",
         "terms": "Terms of Service"
     },

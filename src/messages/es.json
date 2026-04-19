@@ -1,6 +1,6 @@
-{
+﻿{
     "common": {
-        "storeName": "TOKYO RENDAIRE",
+        "storeName": "TOKYO ROZE",
         "tagline": "Servicio de escort exclusivo en Tokio",
         "bookNow": "Reservar ahora",
         "viewDetails": "Ver detalles",
@@ -30,7 +30,7 @@
     },
     "about": {
         "title": "Sobre nosotros",
-        "description": "TOKYO RENDAIRE es un servicio de escort a domicilio (delivery health) con licencia, dirigido a visitantes internacionales y residentes en Tokio. Nos enorgullecemos de ofrecer la experiencia de más alta calidad con acompañantes cuidadosamente seleccionadas.",
+        "description": "TOKYO ROZE es un servicio de escort a domicilio (delivery health) con licencia, dirigido a visitantes internacionales y residentes en Tokio. Nos enorgullecemos de ofrecer la experiencia de más alta calidad con acompañantes cuidadosamente seleccionadas.",
         "point1": "Con licencia completa y cumplimiento legal",
         "point2": "Acompañantes premium cuidadosamente seleccionadas",
         "point3": "Servicio a domicilio en hoteles y residencias",
@@ -142,7 +142,7 @@
     },
     "recruit": {
         "title": "Trabaja con nosotros",
-        "heroTitle": "Únete a TOKYO RENDAIRE",
+        "heroTitle": "Únete a TOKYO ROZE",
         "heroSubtitle": "Las mejores condiciones del sector para una carrera libre y lucrativa",
         "hiringNow": "Contratando activamente",
         "backRate": "Tasa de retorno libre",
@@ -157,7 +157,7 @@
         "simMonthly": "Mensual (5 días/sem.)",
         "simNoteMonthly": "¥134,400 × 20 días/mes",
         "simTips": "Más propinas de ¥5,000 a ¥30,000 por sesión",
-        "whyUs": "¿Por qué elegir TOKYO RENDAIRE?",
+        "whyUs": "¿Por qué elegir TOKYO ROZE?",
         "earning": "Altos ingresos",
         "earningDesc": "70 % libre / 80 % nominación — la mejor tasa del sector. Su esfuerzo se recompensa.",
         "schedule": "Espera en casa",
@@ -213,7 +213,7 @@
     "footer": {
         "legal": "Este servicio opera bajo una licencia válida según la Ley de Control de Negocios de Entretenimiento de Japón (風営法届出済).",
         "disclaimer": "Todas las acompañantes tienen 18 años o más. Se requiere verificación de identidad.",
-        "copyright": "© 2026 TOKYO RENDAIRE. Todos los derechos reservados.",
+        "copyright": "© 2026 TOKYO ROZE. Todos los derechos reservados.",
         "privacy": "Política de privacidad",
         "terms": "Términos de servicio"
     },

@@ -9,7 +9,6 @@ const path = require('path');
 
 const envPath = path.join(__dirname, '..', '.env');
 const claude = require('../services/claude');
-const twitter = require('../services/twitter');
 const telegram = require('../services/telegram');
 const github = require('../services/github');
 
@@ -17,8 +16,6 @@ const github = require('../services/github');
 const ENV_KEYS = [
     'ADMIN_ID', 'ADMIN_PASSWORD', 'ADMIN_SESSION_SECRET', 'PORT', 'SITE_URL',
     'ANTHROPIC_API_KEY',
-    'TWITTER_API_KEY', 'TWITTER_API_SECRET', 'TWITTER_ACCESS_TOKEN', 'TWITTER_ACCESS_SECRET',
-    'TWITTER_API_KEY_JA', 'TWITTER_API_SECRET_JA', 'TWITTER_ACCESS_TOKEN_JA', 'TWITTER_ACCESS_SECRET_JA',
     'TELEGRAM_BOT_TOKEN', 'TELEGRAM_CHANNEL_ID',
     'GITHUB_TOKEN', 'GITHUB_REPO'
 ];
@@ -125,7 +122,6 @@ router.post('/settings', (req, res) => {
 
     // 該当サービスを再初期化
     claude.reinitialize();
-    twitter.reinitialize();
     telegram.reinitialize();
     github.reinitialize();
 
@@ -139,16 +135,6 @@ router.post('/settings/test', async (req, res) => {
 
     try {
         switch (service) {
-            case 'twitter_en': {
-                const result = await twitter.verifyCredentials('en');
-                if (result.success) return res.json({ success: true, message: '接続成功（テストツイート投稿・削除OK）' });
-                return res.json({ success: false, message: `エラー: ${result.error}` });
-            }
-            case 'twitter_ja': {
-                const result = await twitter.verifyCredentials('ja');
-                if (result.success) return res.json({ success: true, message: '接続成功（テストツイート投稿・削除OK）' });
-                return res.json({ success: false, message: `エラー: ${result.error}` });
-            }
             case 'telegram': {
                 const result = await telegram.getMe();
                 if (result.success) return res.json({ success: true, message: `接続成功: @${result.data.username}` });

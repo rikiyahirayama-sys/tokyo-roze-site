@@ -28,20 +28,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/blog', express.static(path.join(__dirname, 'blog')));
 
-// デバッグ用: publicディレクトリのファイル一覧
-app.get('/debug-files', (req, res) => {
-    const fs = require('fs');
-    const publicDir = path.join(__dirname, 'public');
-    try {
-        const files = fs.readdirSync(publicDir);
-        const adminExists = fs.existsSync(path.join(publicDir, 'admin.html'));
-        const indexExists = fs.existsSync(path.join(publicDir, 'index.html'));
-        res.json({ publicDir, files, adminExists, indexExists, cwd: process.cwd(), dirname: __dirname });
-    } catch (e) {
-        res.json({ error: e.message, publicDir, cwd: process.cwd(), dirname: __dirname });
-    }
-});
-
 // ===== APIルーティング =====
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/cast', require('./routes/cast'));
@@ -79,13 +65,12 @@ app.use('/api', (err, req, res, next) => {
 // ===== サーバー起動 =====
 const server = app.listen(PORT);
 server.on('listening', () => {
-    console.log('✅ Tokyo Rendaire 管理サーバー起動');
+    console.log('✅ Tokyo Roze 管理サーバー起動');
     console.log('📄 LP: http://localhost:' + PORT);
     console.log('⚙️  管理画面: http://localhost:' + PORT + '/admin.html');
     // 環境変数の読み込み状態を表示
     console.log('🔑 ENV check:', {
         ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY ? '✓ set' : '✗ missing',
-        TWITTER_API_KEY: process.env.TWITTER_API_KEY ? '✓ set' : '✗ missing',
         TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN ? '✓ set' : '✗ missing',
         WHATSAPP_API_TOKEN: process.env.WHATSAPP_API_TOKEN ? '✓ set' : '✗ missing',
         LINE_CHANNEL_ACCESS_TOKEN: process.env.LINE_CHANNEL_ACCESS_TOKEN ? '✓ set' : '✗ missing',

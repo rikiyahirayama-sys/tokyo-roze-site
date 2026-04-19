@@ -23,7 +23,7 @@ function generateBlogHTML({ title, meta, body, slug }) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>${escapeHtml(title)} | Tokyo Rendaire Blog</title>
+<title>${escapeHtml(title)} | Tokyo Roze Blog</title>
 <meta name="description" content="${escapeHtml(meta)}">
 <link rel="canonical" href="${articleUrl}">
 <meta property="og:title" content="${escapeHtml(title)}">
@@ -40,7 +40,7 @@ function generateBlogHTML({ title, meta, body, slug }) {
   "description":"${escapeJSON(meta)}",
   "url":"${articleUrl}",
   "datePublished":"${date}",
-  "publisher":{"@type":"Organization","name":"Tokyo Rendaire","url":"${siteUrl}"}
+  "publisher":{"@type":"Organization","name":"Tokyo Roze","url":"${siteUrl}"}
 }
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -69,7 +69,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:#0f0f12;color:#e8e6e3;line
 </head>
 <body>
 <header class="blog-header">
-  <a href="${siteUrl}" class="logo">TOKYO RENDAIRE</a>
+  <a href="${siteUrl}" class="logo">TOKYO ROZE</a>
   <nav>
     <a href="${siteUrl}">Home</a>
     <a href="${siteUrl}/blog/">Blog</a>
@@ -80,13 +80,13 @@ body{font-family:'Noto Sans JP',sans-serif;background:#0f0f12;color:#e8e6e3;line
   <div class="meta">Published: ${date}</div>
   ${body}
   <div class="cta">
-    <h2>Experience Tokyo Rendaire</h2>
+    <h2>Experience Tokyo Roze</h2>
     <p style="color:#ccc">Discover premium companionship in Tokyo's finest district.</p>
     <a href="${siteUrl}/#contact">Book Now</a>
   </div>
 </main>
 <footer class="blog-footer">
-  &copy; ${new Date().getFullYear()} Tokyo Rendaire. All rights reserved.
+  &copy; ${new Date().getFullYear()} Tokyo Roze. All rights reserved.
 </footer>
 </body>
 </html>`;
@@ -109,8 +109,8 @@ function generateBlogIndexHTML(articles) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Blog | Tokyo Rendaire</title>
-<meta name="description" content="Tokyo Rendaire Blog - Nightlife, lifestyle and culture in Tokyo.">
+<title>Blog | Tokyo Roze</title>
+<meta name="description" content="Tokyo Roze Blog - Nightlife, lifestyle and culture in Tokyo.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -131,7 +131,7 @@ h1{font-family:'Cormorant Garamond',serif;font-size:2.4em;color:#C9A96E;text-ali
 </head>
 <body>
 <header class="blog-header">
-  <a href="${siteUrl}" class="logo">TOKYO RENDAIRE</a>
+  <a href="${siteUrl}" class="logo">TOKYO ROZE</a>
   <nav><a href="${siteUrl}">Home</a></nav>
 </header>
 <h1>Blog</h1>

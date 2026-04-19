@@ -81,7 +81,7 @@ export default function EntrancePage() {
             <head>
                 <meta charSet="utf-8" />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
-                <title>TOKYO RENDAIRE</title>
+                <title>TOKYO ROZE</title>
                 <link rel="preconnect" href="https://fonts.googleapis.com" />
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
                 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet" />
@@ -92,7 +92,7 @@ export default function EntrancePage() {
                     <div style={{ marginBottom: 24 }}>
                         <Image
                             src="/images/logo.png"
-                            alt="TOKYO RENDAIRE"
+                            alt="TOKYO ROZE"
                             width={160}
                             height={160}
                             style={{ width: 160, height: "auto", borderRadius: 12, margin: "0 auto" }}
@@ -100,13 +100,13 @@ export default function EntrancePage() {
                         />
                     </div>
                     <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2.4rem", fontWeight: 700, color: "#F8F4EE", marginBottom: 4, letterSpacing: "0.05em" }}>
-                        TOKYO RENDAIRE
+                        TOKYO ROZE
                     </h1>
                     <p style={{ fontSize: "0.85rem", color: "rgba(248,244,238,0.5)", marginBottom: 8, letterSpacing: "0.15em" }}>
-                        トウキョウ ランディア
+                        トウキョウ ローゼ
                     </p>
                     <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1rem", fontStyle: "italic", color: "#C9A96E", marginBottom: 40 }}>
-                        Rendaire is your bespoke Tokyo rendezvous.
+                        Roze is your bespoke Tokyo rendezvous.
                     </p>
 
                     {declined ? (

@@ -18,7 +18,6 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
         // Dynamically load services
         const claude = require("../../../../../../services/claude");
-        const twitter = require("../../../../../../services/twitter");
         const telegram = require("../../../../../../services/telegram");
 
         const posts = await claude.generateNewCastAnnouncement(cast);
@@ -27,14 +26,6 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         const imagePath = cast.photos && cast.photos.length > 0 ? cast.photos[0] : null;
         const results: { platform: string;[k: string]: unknown }[] = [];
 
-        if (posts.twitter_en) {
-            const r = await twitter.postTweet(posts.twitter_en, imagePath, "en");
-            results.push({ platform: "twitter_en", ...r });
-        }
-        if (posts.twitter_ja) {
-            const r = await twitter.postTweet(posts.twitter_ja, imagePath, "ja");
-            results.push({ platform: "twitter_ja", ...r });
-        }
         if (posts.telegram) {
             const r = await telegram.postToChannel(posts.telegram, imagePath);
             results.push({ platform: "telegram", ...r });

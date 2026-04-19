@@ -10,7 +10,7 @@ export async function generateMetadata({
 }) {
     const t = await getTranslations({ locale, namespace: "cast" });
     return {
-        title: `${t("title")} — TOKYO RENDAIRE`,
+        title: `${t("title")} — TOKYO ROZE`,
         description: t("subtitle"),
     };
 }

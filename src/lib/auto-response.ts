@@ -222,12 +222,12 @@ function parseCourse(msg: string): string | null {
 
 function getGreeting(locale: string): string {
     const greetings: Record<string, string> = {
-        ja: `TOKYO RENDAIREへようこそ！🌹\n\n以下からお選びください：\n\n📋 「予約」— ご予約の手続き\n💎 「料金」— コース・料金一覧\n👤 「キャスト」— 在籍キャスト一覧\n📍 「エリア」— 出張可能エリア\n\nまたはお気軽にご質問ください！\n24時間自動対応いたします。`,
-        en: `Welcome to TOKYO RENDAIRE! 🌹\n\nHow can we help you?\n\n📋 "Book" — Start a reservation\n💎 "Prices" — View courses & rates\n👤 "Cast" — View available ladies\n📍 "Area" — Service areas\n\nFeel free to ask anything!\nOur AI assistant is available 24/7.`,
-        zh: `欢迎来到 TOKYO RENDAIRE！🌹\n\n请回复以下选项：\n\n📋「预约」— 开始预约\n💎「价格」— 查看课程与费用\n👤「佳丽」— 查看在籍佳丽\n📍「地区」— 服务区域\n\n随时提问，24小时自动应答！`,
-        fr: `Bienvenue chez TOKYO RENDAIRE ! 🌹\n\n📋 "Réserver" — Faire une réservation\n💎 "Prix" — Tarifs et formules\n👤 "Cast" — Nos demoiselles\n📍 "Zone" — Zones de service`,
-        es: `¡Bienvenido a TOKYO RENDAIRE! 🌹\n\n📋 "Reservar" — Hacer una reserva\n💎 "Precios" — Tarifas y cursos\n👤 "Cast" — Nuestras damas\n📍 "Área" — Zonas de servicio`,
-        hi: `TOKYO RENDAIRE में आपका स्वागत है! 🌹\n\n📋 "Book" — बुकिंग करें\n💎 "Prices" — दरें देखें\n👤 "Cast" — उपलब्ध महिलाएं\n📍 "Area" — सेवा क्षेत्र`,
+        ja: `TOKYO ROZEへようこそ！🌹\n\n以下からお選びください：\n\n📋 「予約」— ご予約の手続き\n💎 「料金」— コース・料金一覧\n👤 「キャスト」— 在籍キャスト一覧\n📍 「エリア」— 出張可能エリア\n\nまたはお気軽にご質問ください！\n24時間自動対応いたします。`,
+        en: `Welcome to TOKYO ROZE! 🌹\n\nHow can we help you?\n\n📋 "Book" — Start a reservation\n💎 "Prices" — View courses & rates\n👤 "Cast" — View available ladies\n📍 "Area" — Service areas\n\nFeel free to ask anything!\nOur AI assistant is available 24/7.`,
+        zh: `欢迎来到 TOKYO ROZE！🌹\n\n请回复以下选项：\n\n📋「预约」— 开始预约\n💎「价格」— 查看课程与费用\n👤「佳丽」— 查看在籍佳丽\n📍「地区」— 服务区域\n\n随时提问，24小时自动应答！`,
+        fr: `Bienvenue chez TOKYO ROZE ! 🌹\n\n📋 "Réserver" — Faire une réservation\n💎 "Prix" — Tarifs et formules\n👤 "Cast" — Nos demoiselles\n📍 "Zone" — Zones de service`,
+        es: `¡Bienvenido a TOKYO ROZE! 🌹\n\n📋 "Reservar" — Hacer una reserva\n💎 "Precios" — Tarifas y cursos\n👤 "Cast" — Nuestras damas\n📍 "Área" — Zonas de servicio`,
+        hi: `TOKYO ROZE में आपका स्वागत है! 🌹\n\n📋 "Book" — बुकिंग करें\n💎 "Prices" — दरें देखें\n👤 "Cast" — उपलब्ध महिलाएं\n📍 "Area" — सेवा क्षेत्र`,
     };
     return greetings[locale] || greetings.en;
 }

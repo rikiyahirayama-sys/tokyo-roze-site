@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
                     price_data: {
                         currency: "jpy",
                         product_data: {
-                            name: `TOKYO RENDAIRE — ${courseName} (${course.duration}min)`,
+                            name: `TOKYO ROZE — ${courseName} (${course.duration}min)`,
                             description: `${validated.date} ${validated.time} | ${castName} | ${validated.hotel}`,
                         },
                         unit_amount: total,

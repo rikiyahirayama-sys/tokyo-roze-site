@@ -1,6 +1,6 @@
-{
+﻿{
     "common": {
-        "storeName": "TOKYO RENDAIRE",
+        "storeName": "TOKYO ROZE",
         "tagline": "东京高端外派服务",
         "bookNow": "立即预约",
         "viewDetails": "查看详情",
@@ -30,7 +30,7 @@
     },
     "about": {
         "title": "关于我们",
-        "description": "TOKYO RENDAIRE 是一家面向在日外国游客和居民的持证外派陪伴服务（デリバリーヘルス）。我们以提供最高品质的体验为荣，精心挑选善于沟通、致力于确保您完全满意的佳丽。",
+        "description": "TOKYO ROZE 是一家面向在日外国游客和居民的持证外派陪伴服务（デリバリーヘルス）。我们以提供最高品质的体验为荣，精心挑选善于沟通、致力于确保您完全满意的佳丽。",
         "point1": "合法持证经营",
         "point2": "精心挑选的高品质佳丽",
         "point3": "酒店及住所外派服务",
@@ -142,7 +142,7 @@
     },
     "recruit": {
         "title": "加入我们",
-        "heroTitle": "加入 TOKYO RENDAIRE",
+        "heroTitle": "加入 TOKYO ROZE",
         "heroSubtitle": "业界最高待遇，实现你自由的工作方式",
         "hiringNow": "正在招聘",
         "backRate": "自由提成率",
@@ -213,7 +213,7 @@
     "footer": {
         "legal": "本服务依据日本《风俗营业法》合法持证经营。",
         "disclaimer": "所有佳丽均年满18周岁。需进行有效身份验证。",
-        "copyright": "© 2026 TOKYO RENDAIRE. 版权所有。",
+        "copyright": "© 2026 TOKYO ROZE. 版权所有。",
         "privacy": "隐私政策",
         "terms": "服务条款"
     },

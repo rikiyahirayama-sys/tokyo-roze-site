@@ -88,7 +88,7 @@ export function getAutoReply(
         if (msg.includes("价格") || msg.includes("price") || msg.includes("费用")) {
             return `我们的价格方案如下：\n\n💎 标准60分 — ¥30,000\n💎 标准90分 — ¥42,000\n💎 尊享120分 — ¥55,000\n💎 VIP 180分 — ¥80,000\n\n详情请访问：${process.env.NEXT_PUBLIC_BASE_URL}/zh/system`;
         }
-        return `感谢您联系 TOKYO RENDAIRE！\n\n我们是东京高端外派服务。\n\n🔹 查看佳丽：回复「佳丽」\n🔹 查看价格：回复「价格」\n🔹 预约：回复「预约」\n\n或直接访问我们的网站：${process.env.NEXT_PUBLIC_BASE_URL}/zh`;
+        return `感谢您联系 TOKYO ROZE！\n\n我们是东京高端外派服务。\n\n🔹 查看佳丽：回复「佳丽」\n🔹 查看价格：回复「价格」\n🔹 预约：回复「预约」\n\n或直接访问我们的网站：${process.env.NEXT_PUBLIC_BASE_URL}/zh`;
     }
 
     // English default
@@ -98,5 +98,5 @@ export function getAutoReply(
     if (msg.includes("price") || msg.includes("rate") || msg.includes("cost") || msg.includes("how much")) {
         return `Our courses:\n\n💎 Standard 60min — ¥30,000\n💎 Standard 90min — ¥42,000\n💎 Premium 120min — ¥55,000\n💎 VIP 180min — ¥80,000\n\nDetails: ${process.env.NEXT_PUBLIC_BASE_URL}/en/system`;
     }
-    return `Thank you for contacting TOKYO RENDAIRE!\n\nWe are Tokyo's premium outcall escort service.\n\n🔹 View ladies: Reply "ladies"\n🔹 See prices: Reply "prices"\n🔹 Book now: Reply "book"\n\nOr visit our website: ${process.env.NEXT_PUBLIC_BASE_URL}/en`;
+    return `Thank you for contacting TOKYO ROZE!\n\nWe are Tokyo's premium outcall escort service.\n\n🔹 View ladies: Reply "ladies"\n🔹 See prices: Reply "prices"\n🔹 Book now: Reply "book"\n\nOr visit our website: ${process.env.NEXT_PUBLIC_BASE_URL}/en`;
 }

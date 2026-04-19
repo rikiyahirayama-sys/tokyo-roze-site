@@ -16,7 +16,7 @@ export async function generateMetadata({
     const cast = siteData.casts.find((c) => c.id === id);
     if (!cast) return { title: "Not Found" };
     return {
-        title: `${cast.name} — ${t("title")} | TOKYO RENDAIRE`,
+        title: `${cast.name} — ${t("title")} | TOKYO ROZE`,
         description: tl(cast.profile, locale),
     };
 }

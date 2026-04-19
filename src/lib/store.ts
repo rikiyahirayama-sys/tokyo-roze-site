@@ -55,7 +55,7 @@ const DATA_FILE = path.join(process.cwd(), "data", "site-data.json");
 
 const defaultData: SiteData = {
     settings: {
-        storeName: "TOKYO RENDAIRE",
+        storeName: "TOKYO ROZE",
         storeSubtitle: "Tokyo Premium Escort",
         openTime: "17:00",
         closeTime: "05:00",
@@ -63,7 +63,7 @@ const defaultData: SiteData = {
         email: "",
         address: "東京都港区六本木",
         siteUrl: "https://tokyoroze.com",
-        metaTitle: "TOKYO RENDAIRE — Tokyo Premium Escort",
+        metaTitle: "TOKYO ROZE — Tokyo Premium Escort",
         metaDescription: "Premium escort service in Tokyo. International guests welcome.",
         nominationFee: 2000,
         extensionRate30min: 10000,

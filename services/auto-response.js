@@ -235,9 +235,9 @@ function parseCourse(msg) {
 // --- 回答テンプレート ---
 function getGreeting(locale) {
     const m = {
-        ja: `TOKYO RENDAIREへようこそ！🌹\n\n以下からお選びください：\n\n📋 「予約」— ご予約の手続き\n💎 「料金」— コース・料金一覧\n👤 「キャスト」— 在籍キャスト一覧\n📍 「エリア」— 出張可能エリア\n\nまたはお気軽にご質問ください！\n24時間自動対応いたします。`,
-        en: `Welcome to TOKYO RENDAIRE! 🌹\n\nHow can we help you?\n\n📋 "Book" — Start a reservation\n💎 "Prices" — View courses & rates\n👤 "Cast" — View available ladies\n📍 "Area" — Service areas\n\nFeel free to ask anything!\nOur AI assistant is available 24/7.`,
-        zh: `欢迎来到 TOKYO RENDAIRE！🌹\n\n请回复以下选项：\n\n📋「预约」— 开始预约\n💎「价格」— 查看课程与费用\n👤「佳丽」— 查看在籍佳丽\n📍「地区」— 服务区域\n\n随时提问，24小时自动应答！`,
+        ja: `TOKYO ROZEへようこそ！🌹\n\n以下からお選びください：\n\n📋 「予約」— ご予約の手続き\n💎 「料金」— コース・料金一覧\n👤 「キャスト」— 在籍キャスト一覧\n📍 「エリア」— 出張可能エリア\n\nまたはお気軽にご質問ください！\n24時間自動対応いたします。`,
+        en: `Welcome to TOKYO ROZE! 🌹\n\nHow can we help you?\n\n📋 "Book" — Start a reservation\n💎 "Prices" — View courses & rates\n👤 "Cast" — View available ladies\n📍 "Area" — Service areas\n\nFeel free to ask anything!\nOur AI assistant is available 24/7.`,
+        zh: `欢迎来到 TOKYO ROZE！🌹\n\n请回复以下选项：\n\n📋「预约」— 开始预约\n💎「价格」— 查看课程与费用\n👤「佳丽」— 查看在籍佳丽\n📍「地区」— 服务区域\n\n随时提问，24小时自动应答！`,
     };
     return m[locale] || m.en;
 }

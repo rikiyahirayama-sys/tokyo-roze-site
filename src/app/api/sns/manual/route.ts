@@ -36,22 +36,11 @@ export async function POST(request: NextRequest) {
             imagePath = path.join("uploads", filename);
         }
 
-        const twitter = require("../../../../../services/twitter");
         const telegram = require("../../../../../services/telegram");
         const results: { platform: string;[k: string]: unknown }[] = [];
 
         for (const platform of platformList) {
             switch (platform) {
-                case "twitter_en": {
-                    const r = await twitter.postTweet(text, imagePath, "en");
-                    results.push({ platform: "twitter_en", ...r });
-                    break;
-                }
-                case "twitter_ja": {
-                    const r = await twitter.postTweet(text, imagePath, "ja");
-                    results.push({ platform: "twitter_ja", ...r });
-                    break;
-                }
                 case "telegram": {
                     const r = await telegram.postToChannel(text, imagePath);
                     results.push({ platform: "telegram", ...r });
